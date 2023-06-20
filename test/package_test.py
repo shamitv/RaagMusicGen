@@ -1,0 +1,2 @@
+from musictree import Score
+
