@@ -31,13 +31,17 @@ note_weights = []
 for octave in octaves:
     for note in malkauns_raag_notes:
         notes.append({"octave": octave, "note": note})
+        weight = 10
         if note == vaadi_swar:
-            note_weights.append(50)
+            weight = weight*5
         else:
             if note == samvaadi_swar:
-                note_weights.append(30)
+                weight = weight*3
             else:
-                note_weights.append(10)
+                weight = weight*1
+        if octave == madhya_saptak_octave:
+            weight = weight * 2
+        note_weights.append(weight)
 
 durations = [1, 0.5, 0.5, 0.25, 0.25, 0.125]
 scr = Score()
@@ -86,7 +90,7 @@ current_duration = random.choice(durations)
 change_duration_or_not = [None, None, 1, None, None, None]
 non_1_duration_count = 0
 
-notes_in_a_beat = [1, 2]
+notes_in_a_beat = [1, 2, 4]
 
 # Each iteration of this loop represents a beat
 while len(generated_notes) > 0:
