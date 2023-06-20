@@ -254,9 +254,16 @@ class Score(MusicTree, FinalUpdateMixin, XMLWrapper):
         :return: None
         """
         with open(path, '+w') as f:
-            f.write("""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE score-partwise PUBLIC
-    "-//Recordare//DTD MusicXML 4.0 Partwise//EN"
-    "http://www.musicxml.org/dtds/partwise.dtd">
-""")
-            f.write(self.to_string())
+            f.write(self.get_xml_string())
+
+    def get_xml_string(self):
+        ret = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <!DOCTYPE score-partwise PUBLIC
+            "-//Recordare//DTD MusicXML 4.0 Partwise//EN"
+            "http://www.musicxml.org/dtds/partwise.dtd">
+        """
+        ret += self.to_string()
+        return ret
+
+    def export_xml_doc(self):
+        return None
