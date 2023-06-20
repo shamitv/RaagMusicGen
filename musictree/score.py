@@ -2,21 +2,25 @@ from typing import List
 
 from musictree import Part
 from musictree.finalupdate_mixin import FinalUpdateMixin
-from musicxml.xmlelement.xmlelement import XMLScorePartwise, XMLPartList, XMLCredit, XMLCreditWords, XMLIdentification, XMLEncoding, \
+from musicxml.xmlelement.xmlelement import XMLScorePartwise, XMLPartList, XMLCredit, XMLCreditWords, XMLIdentification, \
+    XMLEncoding, \
     XMLSupports
 
 from musictree.core import MusicTree
 from musictree.quarterduration import QuarterDuration
 from musictree.xmlwrapper import XMLWrapper
 from musictree.layout import Scaling, PageLayout, SystemLayout, StaffLayout
+import xml.etree.ElementTree as ET
 
 __all__ = ['TITLE', 'SUBTITLE', 'POSSIBLE_SUBDIVISIONS', 'Score']
 #:
-TITLE = {'font_size': 24, 'default_x': {'A4': {'portrait': 616}}, 'default_y': {'A4': {'portrait': 1573}}, 'justify': 'center',
+TITLE = {'font_size': 24, 'default_x': {'A4': {'portrait': 616}}, 'default_y': {'A4': {'portrait': 1573}},
+         'justify': 'center',
          'valign': 'top'}
 
 #:
-SUBTITLE = {'font_size': 18, 'default_x': {'A4': {'portrait': 616}}, 'default_y': {'A4': {'portrait': 1508}}, 'halign': 'center',
+SUBTITLE = {'font_size': 18, 'default_x': {'A4': {'portrait': 616}}, 'default_y': {'A4': {'portrait': 1508}},
+            'halign': 'center',
             'valign': 'top'}
 #:
 POSSIBLE_SUBDIVISIONS = {QuarterDuration(1, 4): [2, 3], QuarterDuration(1, 2): [2, 3, 4, 5],
@@ -265,5 +269,7 @@ class Score(MusicTree, FinalUpdateMixin, XMLWrapper):
         ret += self.to_string()
         return ret
 
-    def export_xml_doc(self):
-        return None
+    def export_xml_root(self):
+        xml_str = self.get_xml_string()
+        root = ET.fromstring(xml_str)
+        return root
