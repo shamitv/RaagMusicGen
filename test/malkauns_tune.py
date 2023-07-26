@@ -3,9 +3,12 @@ import random
 from musictree import Score, Part
 from MusicNotes import ChordGen
 
-d_major_scale_modified = ['D', 'E', 'F', 'G', 'A', 'A#', 'C']
 octave_offset = {'D': 0, 'E': 0, 'F': 0, 'G': 0, 'A': 1, 'A#': 0, 'C': 1}
-hindi_notes = ['सा', 'रे', 'गा', 'मा', 'पा', 'धा', 'नी']
+
+d_major_scale =          ['D', 'E', 'F#', 'G', 'A', 'B', 'C#', 'D']
+malkauns_raag_notes =    ['सा', 'गा', 'मा', 'धा', 'नी']
+d_major_scale_modified = ['D', 'E', 'F', 'G',  'A', 'A#', 'C']
+hindi_notes =            ['सा', 'रे', 'गा', 'मा', 'पा', 'धा', 'नी']
 
 hindi_to_western_mapping = {}
 
@@ -33,22 +36,22 @@ for octave in octaves:
         notes.append({"octave": octave, "note": note})
         weight = 10
         if note == vaadi_swar:
-            weight = weight*5
+            weight = weight * 5
         else:
             if note == samvaadi_swar:
-                weight = weight*3
+                weight = weight * 3
             else:
-                weight = weight*1
+                weight = weight * 1
         if octave == madhya_saptak_octave:
             weight = weight * 2
         note_weights.append(weight)
 
-durations = [1, 0.5, 0.5, 0.25, 0.25, 0.125]
+durations = [0.5, 0.5, 0.25, 0.25, 0.125]
 scr = Score()
 p = scr.add_child(Part('P1', name='Part 1'))
 measure = p.add_measure();
 
-bars = 72
+bars = 16
 num_notes = bars * 4
 
 generated_notes = []
@@ -90,12 +93,13 @@ current_duration = random.choice(durations)
 change_duration_or_not = [None, None, 1, None, None, None]
 non_1_duration_count = 0
 
-notes_in_a_beat = [1, 2, 4]
+notes_in_a_beat = [1, 2, 4, 8]
+weights = [100, 200, 50, 5]
 
 # Each iteration of this loop represents a beat
 while len(generated_notes) > 0:
     notes = []
-    num_notes = random.choice(notes_in_a_beat)
+    num_notes = random.choices(notes_in_a_beat, weights=weights, k=1)[0]
     for i in range(num_notes):
         if generated_notes:
             notes.append(generated_notes.pop(0))
@@ -109,4 +113,4 @@ while len(generated_notes) > 0:
         note.add_lyric(hindi_note)
         p.add_chord(note)
 
-scr.export_xml('../data/generated_songs/malkauns/malkauns_tune_1_1.xml')
+scr.export_xml('../data/generated_songs/malkauns/malkauns_tune_1_3.xml')
