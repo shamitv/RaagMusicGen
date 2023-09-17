@@ -1,3 +1,4 @@
+import os.path
 import random
 
 from musictree import Score, Part
@@ -5,10 +6,10 @@ from MusicNotes import ChordGen
 
 octave_offset = {'D': 0, 'E': 0, 'F': 0, 'G': 0, 'A': 1, 'A#': 0, 'C': 1}
 
-d_major_scale =          ['D', 'E', 'F#', 'G', 'A', 'B', 'C#', 'D']
-malkauns_raag_notes =    ['सा', 'गा', 'मा', 'धा', 'नी']
-d_major_scale_modified = ['D', 'E', 'F', 'G',  'A', 'A#', 'C']
-hindi_notes =            ['सा', 'रे', 'गा', 'मा', 'पा', 'धा', 'नी']
+d_major_scale = ['D', 'E', 'F#', 'G', 'A', 'B', 'C#', 'D']
+malkauns_raag_notes = ['सा', 'गा', 'मा', 'धा', 'नी']
+d_major_scale_modified = ['D', 'E', 'F', 'G', 'A', 'A#', 'C']
+hindi_notes = ['सा', 'रे', 'गा', 'मा', 'पा', 'धा', 'नी']
 
 hindi_to_western_mapping = {}
 
@@ -113,4 +114,9 @@ while len(generated_notes) > 0:
         note.add_lyric(hindi_note)
         p.add_chord(note)
 
-scr.export_xml('../data/generated_songs/malkauns/malkauns_tune_1_3.xml')
+output_dir = '../data/generated_songs/'
+
+if not os.path.isdir(output_dir):
+    output_dir = './data/generated_songs/'
+
+scr.export_xml(output_dir + '/malkauns/malkauns_tune_1_4.xml')
