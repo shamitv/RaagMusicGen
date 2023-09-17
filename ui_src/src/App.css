@@ -1,0 +1,11 @@
+.aspect-w-1 {
+  width: 100%;
+}
+
+.aspect-h-1 {
+  height: 100%;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
