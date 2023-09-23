@@ -1,3 +1,4 @@
 /data/generated_songs/
 /venv/
 node_modules
+.DS_Store
