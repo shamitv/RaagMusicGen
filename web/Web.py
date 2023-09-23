@@ -15,5 +15,5 @@ def root_hello():
 
 @RaagApp.get("/malkauns")
 def root_hello():
-    xml = Malkauns.getTune()
+    xml = Malkauns().getTune()
     return {"xml": xml}
