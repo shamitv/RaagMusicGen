@@ -1,7 +1,11 @@
+import string
+
 from musictree import Chord
 
 
 class ChordGen:
+    scale_notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
+                   "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
     notes = {
         'A-1': 21,
         'A#-1': 22,
@@ -125,3 +129,29 @@ class ChordGen:
     def get_rest(cls, duration):
         c = Chord(0, duration)
         return c
+
+    @classmethod
+    def get_major_scale(cls, key_note):
+        octave = 3  # Octave does not matter, using an Octave
+        # Since notes dict has notes along with octaves
+        # E.g.: C#5
+        tonic = key_note + str(octave)
+        if tonic not in cls.notes:
+            raise Exception("Unknown note " + key_note)
+        root_idx = cls.notes[tonic]
+        scale_intervals = [
+            0,  # Tonic/ root note
+            2,  # Major second
+            4,  # Major Third
+            6,  # Perfect Fourth
+            7,  # Perfect Fifth
+            9,  # Major Sixth
+            11,  # Major Seventh
+        ]
+        scale_notes = []
+        for i in scale_intervals:
+            note_name = cls.notes[root_idx + i]
+            note = note_name.rstrip(string.digits)
+            scale_notes.append(note)
+
+        return scale_notes
