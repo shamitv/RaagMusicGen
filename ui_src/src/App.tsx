@@ -6,7 +6,6 @@ import { useState } from "react";
 import toWav from 'audiobuffer-to-wav'
 
 let soundFontBuffer:Uint8Array;
-let musicXml = null;
 let imgUrl = "./img/cassete.png";
  
 async function getAudioURL(score:WebMscore){
@@ -134,7 +133,6 @@ There is an audio player
  .then(data =>  {
    console.log(data) 
    var xml = data.xml
-   musicXml = xml;
    console.log("Got XML");
    var enc = new TextEncoder();
    var xmlBuffer = enc.encode(xml)
