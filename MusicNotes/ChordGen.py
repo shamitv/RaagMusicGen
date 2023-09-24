@@ -1,7 +1,19 @@
+import string
+
 from musictree import Chord
 
 
 class ChordGen:
+    # Notes are added Thrice to match different names of Indian notes
+    # Indian notes have slightly different notations in 3 octaves
+    western_notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
+                     "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
+                     "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+    sargam_swar = ['.सा', '.रे(k)', '.रे', '.ग(k)', '.ग', '.म', '.म’', '.प', '.ध(k)', '.ध', '.नि(k)', '.नि',
+                   'सा', 'रे(k)', 'रे', 'ग(k)', 'ग', 'म', 'म’', 'प', 'ध(k)', 'ध', 'नि(k)', 'नि',
+                   'सां', 'रें(k)', 'रें', 'गं(k)', 'गं', 'मं', '‘मं', 'पं', 'धं(k)', 'धं', 'निं(k)', 'निं']
+
     notes = {
         'A-1': 21,
         'A#-1': 22,
@@ -125,3 +137,39 @@ class ChordGen:
     def get_rest(cls, duration):
         c = Chord(0, duration)
         return c
+
+    @classmethod
+    def get_major_scale(cls, key_note):
+        if key_note not in cls.scale_notes:
+            raise Exception("Unknown note " + key_note)
+        root_idx = cls.scale_notes.index(key_note)
+        scale_intervals = [
+            0,  # Tonic/ root note
+            2,  # Major second
+            4,  # Major Third
+            5,  # Perfect Fourth
+            7,  # Perfect Fifth
+            9,  # Major Sixth
+            11,  # Major Seventh
+        ]
+        notes = []
+        for i in scale_intervals:
+            note = cls.scale_notes[root_idx + i]
+            notes.append(note)
+
+        return notes
+
+    @classmethod
+    def get_western_notes(cls, indian_notes, scale):
+        notes = []
+        indices = []
+        for i in indian_notes:
+            idx = cls.sargam_swar.index(i)
+            indices.append(idx)
+        if scale != 'C':
+            idx_delta = cls.western_notes.index(scale)
+        else:
+            idx_delta = 0
+        for idx in indices:
+            notes.append(cls.western_notes[idx + idx_delta])
+        return notes

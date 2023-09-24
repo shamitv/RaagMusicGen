@@ -4,16 +4,16 @@ import random
 from musictree import Score, Part
 from MusicNotes import ChordGen
 
+
 class Malkauns:
     name = "Malkauns"
 
     def getTune(self):
         octave_offset = {'D': 0, 'E': 0, 'F': 0, 'G': 0, 'A': 1, 'A#': 0, 'C': 1}
 
-        d_major_scale = ['D', 'E', 'F#', 'G', 'A', 'B', 'C#', 'D']
-        malkauns_raag_notes = ['सा', 'गा', 'मा', 'धा', 'नी']
-        d_major_scale_modified = ['D', 'E', 'F', 'G', 'A', 'A#', 'C']
-        hindi_notes = ['सा', 'रे', 'गा', 'मा', 'पा', 'धा', 'नी']
+        malkauns_raag_notes = ['सा', 'ग(k)', 'म', 'ध(k)', 'नि(k)']
+        d_major_scale_modified = ChordGen.get_western_notes(malkauns_raag_notes, 'D')
+        hindi_notes = malkauns_raag_notes
 
         hindi_to_western_mapping = {}
 
@@ -22,9 +22,7 @@ class Malkauns:
         for i, note in enumerate(hindi_notes):
             hindi_to_western_mapping[note] = scale[i]
 
-        malkauns_raag_notes = ['सा', 'गा', 'मा', 'धा', 'नी']
-
-        vaadi_swar = 'मा'
+        vaadi_swar = 'म'
         samvaadi_swar = 'सा'
 
         mandra_saptak_octave = 2
@@ -35,8 +33,10 @@ class Malkauns:
 
         notes = []
         note_weights = []
+        ret_weights = {}
 
         for octave in octaves:
+            ret_weights[octave] = {}
             for note in malkauns_raag_notes:
                 notes.append({"octave": octave, "note": note})
                 weight = 10
@@ -50,6 +50,7 @@ class Malkauns:
                 if octave == madhya_saptak_octave:
                     weight = weight * 2
                 note_weights.append(weight)
+                ret_weights[octave][hindi_to_western_mapping[note]] = weight
 
         durations = [0.5, 0.5, 0.25, 0.25, 0.125]
         scr = Score()
@@ -84,7 +85,6 @@ class Malkauns:
             next_note = notes[cur_idx]
             generated_notes.append(next_note)
 
-
         def get_note(hindi_note, octave, duration):
             en_note = hindi_to_western_mapping[hindi_note]
             c = ChordGen.get_chord(en_note, octave, duration)
@@ -99,13 +99,13 @@ class Malkauns:
 
         # Each iteration of this loop represents a beat
         while len(generated_notes) > 0:
-            notes = []
+            beat_notes = []
             num_notes = random.choices(notes_in_a_beat, weights=weights, k=1)[0]
             for i in range(num_notes):
                 if generated_notes:
-                    notes.append(generated_notes.pop(0))
-            duration = 1.0 / len(notes)
-            for n in notes:
+                    beat_notes.append(generated_notes.pop(0))
+            duration = 1.0 / len(beat_notes)
+            for n in beat_notes:
                 hindi_note = n['note']
                 hindi_octave = n['octave']
                 en_note = en_note = hindi_to_western_mapping[hindi_note]
@@ -118,5 +118,13 @@ class Malkauns:
         p.id_.delete()
         del scr
         del p
+        self.fillMissingNotes(ret_weights)
+        return ret, notes, ret_weights
 
-        return ret
+    def fillMissingNotes(self, ret_weights):
+        western_notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+        for octave in ret_weights.keys():
+            weights = ret_weights[octave]
+            for note in western_notes:
+                if note not in weights.keys():
+                    weights[note] = 0
