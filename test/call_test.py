@@ -1,4 +1,5 @@
 from Raag import Malkauns
 
-Malkauns().getTune()
-Malkauns().getTune()
+xml_str, notes, note_weights = Malkauns().getTune()
+xml_str, notes, note_weights = Malkauns().getTune()
+

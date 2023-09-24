@@ -4,8 +4,16 @@ from musictree import Chord
 
 
 class ChordGen:
-    scale_notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
-                   "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+    # Notes are added Thrice to match different names of Indian notes
+    # Indian notes have slightly different notations in 3 octaves
+    western_notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
+                     "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
+                     "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+    sargam_swar = ['.सा', '.रे(k)', '.रे', '.ग(k)', '.ग', '.म', '.म’', '.प', '.ध(k)', '.ध', '.नि(k)', '.नि',
+                   'सा', 'रे(k)', 'रे', 'ग(k)', 'ग', 'म', 'म’', 'प', 'ध(k)', 'ध', 'नि(k)', 'नि',
+                   'सां', 'रें(k)', 'रें', 'गं(k)', 'गं', 'मं', '‘मं', 'पं', 'धं(k)', 'धं', 'निं(k)', 'निं']
+
     notes = {
         'A-1': 21,
         'A#-1': 22,
@@ -132,26 +140,36 @@ class ChordGen:
 
     @classmethod
     def get_major_scale(cls, key_note):
-        octave = 3  # Octave does not matter, using an Octave
-        # Since notes dict has notes along with octaves
-        # E.g.: C#5
-        tonic = key_note + str(octave)
-        if tonic not in cls.notes:
+        if key_note not in cls.scale_notes:
             raise Exception("Unknown note " + key_note)
-        root_idx = cls.notes[tonic]
+        root_idx = cls.scale_notes.index(key_note)
         scale_intervals = [
             0,  # Tonic/ root note
             2,  # Major second
             4,  # Major Third
-            6,  # Perfect Fourth
+            5,  # Perfect Fourth
             7,  # Perfect Fifth
             9,  # Major Sixth
             11,  # Major Seventh
         ]
-        scale_notes = []
+        notes = []
         for i in scale_intervals:
-            note_name = cls.notes[root_idx + i]
-            note = note_name.rstrip(string.digits)
-            scale_notes.append(note)
+            note = cls.scale_notes[root_idx + i]
+            notes.append(note)
 
-        return scale_notes
+        return notes
+
+    @classmethod
+    def get_western_notes(cls, indian_notes, scale):
+        notes = []
+        indices = []
+        for i in indian_notes:
+            idx = cls.sargam_swar.index(i)
+            indices.append(idx)
+        if scale != 'C':
+            idx_delta = cls.western_notes.index(scale)
+        else:
+            idx_delta = 0
+        for idx in indices:
+            notes.append(cls.western_notes[idx + idx_delta])
+        return notes
