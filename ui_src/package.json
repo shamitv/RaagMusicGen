@@ -10,6 +10,8 @@
     "preview": "../../rnd/react-learn/node_modules/.bin/vite preview"
   },
   "dependencies": {
+    "@types/audiobuffer-to-wav": "^1.0.2",
+    "audiobuffer-to-wav": "^1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "webmscore": "^1.2.1"
