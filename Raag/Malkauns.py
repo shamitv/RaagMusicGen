@@ -113,7 +113,7 @@ class Malkauns:
                 note = get_note(hindi_note, piano_octave, duration)
                 note.add_lyric(hindi_note)
                 p.add_chord(note)
-            ret = scr.get_xml_string()
+        ret = scr.get_xml_string()
 
         p.id_.delete()
         del scr

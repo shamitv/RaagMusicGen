@@ -1,6 +1,63 @@
 import './App.css'
+import WebMscore from 'webmscore'
+
+import { useState } from "react";
+
+import toWav from 'audiobuffer-to-wav'
+
+let soundFontBuffer:Uint8Array;
+let imgUrl = "./img/cassete.png";
+ 
+async function getAudioURL(score:WebMscore){
+  const metadata = await score.metadata()
+  console.log(metadata)
+             //
+            // synthesize audio, and output using the Web Audio API
+            //
+            const CHANNELS = 2
+            const FRAME_LENGTH = 512
+            const audioCtx = new (AudioContext || AudioContext)()
+            const audioBuf = audioCtx.createBuffer(CHANNELS, (metadata.duration + 1) * 44100, 44100)
+
+
+
+            const fn = await score.synthAudio(0)
+            for (let i = 0; ; i += FRAME_LENGTH) {
+                const res = await fn()
+                const frames = new Float32Array(res.chunk.buffer)
+
+                // audio frames are non-interleaved
+                // Float32Array[ channelA 512 frames, channelB 512 frames ]
+                for (let c = 0; c < CHANNELS; c++) {
+                    const buf = frames.subarray(c * FRAME_LENGTH, (c + 1) * FRAME_LENGTH)
+                    audioBuf.copyToChannel(buf, c, i)
+                }
+
+                if (res.done) {
+                    break
+                }
+            }
+    const blob = new Blob([toWav(audioBuf)], { type: "audio/wav" });
+    const url = window.URL.createObjectURL(blob);
+    return url;
+}
 
 function App() {
+
+  const [imageUrl, setImageUrl] = useState(imgUrl);
+  const [audioUrl, setAudioUrl] = useState("");
+
+  WebMscore.ready.then(async () => {
+    console.log('WebMscore is loaded');
+    const soundFontURL = './sound/MS%20Basic.sf3';
+    fetch(soundFontURL).then
+    (soudfontData => {
+      soudfontData.arrayBuffer().then(buffer => {
+        soundFontBuffer = new Uint8Array(buffer);
+      });
+      
+    })
+})
 
 /*
 Generated from : 
@@ -67,16 +124,54 @@ There is an audio player
         </div>
       </div>
       <div className="mb-8">
-        <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">Generate</button>
+        <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded" onClick={()=>{
+
+ console.log("Fething Tune from API");
+ const api_url = 'http://localhost:8000/malkauns';
+ fetch(api_url, {method:'GET'})  
+ .then(response => response.json())
+ .then(data =>  {
+   console.log(data) 
+   var xml = data.xml
+   console.log("Got XML");
+   var enc = new TextEncoder();
+   var xmlBuffer = enc.encode(xml)
+   WebMscore.load('xml', xmlBuffer, [],false)
+   .then(score => {
+     console.log("Score loaded, fetching metadata");
+     score.metadata().then(meta => 
+       {
+         console.log(meta)
+         score.setSoundFont(soundFontBuffer)
+         console.log("Rendering SVG")
+         score.saveSvg(0,false).then(svg=>{
+           console.log("Got SVG, displaying it")
+           let blob = new Blob([svg], {type: 'image/svg+xml'});
+           let url = URL.createObjectURL(blob);
+           setImageUrl(url)
+           console.log(imgUrl)
+           getAudioURL(score).then(url => {
+            console.log(url)
+            setAudioUrl(url)
+           })  
+         })
+       })
+   })
+ }   )
+ 
+
+        }}>Generate 2</button>
       </div>
       <audio controls className="w-full">
+        <source src={audioUrl} />
       </audio>
       <div className="mb-8">
-        <img src="./img/cassete.png" alt="Music Sheet" className="w-full aspect-w-1 aspect-h-1" />
+        <img src={imageUrl} alt="Music Sheet" className="w-full aspect-w-1 aspect-h-1" />
       </div>
     </div>
   </div>
   )
 }
+
 
 export default App
