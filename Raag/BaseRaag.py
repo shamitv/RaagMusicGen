@@ -9,16 +9,17 @@ def get_note(hindi_note, hindi_to_western_mapping, octave, duration):
     c = ChordGen.get_chord(en_note, octave, duration)
     return c
 
+
 class BaseRaag:
-    def __init__(self,name,vadi,samvadi,raag_notes):
+    def __init__(self, name, vadi, samvadi, raag_notes):
         self.name = name
         self.vadi = vadi
         self.samvadi = samvadi
-        self.raag_notes=raag_notes
+        self.raag_notes = raag_notes
 
-
-    def getTune(self,base_scale):
-        octave_offset = {'D': 0, 'E': 0, 'F': 0, 'G': 0, 'A': 1, 'A#': 0, 'C': 1}
+    def getTune(self, base_scale):
+        octave_offset = {'D': 0, 'D#': 0, 'E': 0, 'F': 0, 'F#': 0, 'G': 0, 'G#': 0,
+                         'A': 1, 'A#': 1, 'B': 1, 'C': 1, 'C#': 1}
         hindi_notes = self.raag_notes
         scale_notes = ChordGen.get_western_notes(hindi_notes, base_scale)
         hindi_to_western_mapping = {}
@@ -126,4 +127,3 @@ class BaseRaag:
             for note in western_notes:
                 if note not in weights.keys():
                     weights[note] = 0
-
