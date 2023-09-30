@@ -31,5 +31,5 @@ def root_hello():
 
 @RaagApp.get("/malkauns")
 def root_hello():
-    xml, notes, note_weights = Malkauns().getTune()
+    xml, notes, note_weights = Malkauns().getTune('D')
     return {"xml": xml ,"notes" : notes , "note_weights":note_weights}

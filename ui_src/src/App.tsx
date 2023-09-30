@@ -2,6 +2,7 @@ import './App.css'
 import WebMscore from 'webmscore'
 
 import {useState} from "react";
+import { useRef } from 'react';
 
 import toWav from 'audiobuffer-to-wav'
 
@@ -45,6 +46,7 @@ function App() {
 
     const [imageUrl, setImageUrl] = useState(imgUrl);
     const [audioUrl, setAudioUrl] = useState("");
+    const audioPlayerRef = useRef(null);
 
     WebMscore.ready.then(async () => {
         console.log('WebMscore is loaded');
@@ -152,6 +154,11 @@ function App() {
                                                         getAudioURL(score).then(url => {
                                                             console.log(url)
                                                             setAudioUrl(url)
+                                                            if(audioPlayerRef.current != null){
+                                                                let tempVar:any = audioPlayerRef.current;
+                                                                tempVar.load();
+                                                                tempVar.play();
+                                                            }
                                                         })
                                                     })
                                                 })
@@ -159,10 +166,10 @@ function App() {
                                     })
 
 
-                            }}>Generate 2
+                            }}>Generate Tune
                     </button>
                 </div>
-                <audio controls className="w-full">
+                <audio controls className="w-full" ref={audioPlayerRef}>
                     <source src={audioUrl}/>
                 </audio>
                 <div className="mb-8">
