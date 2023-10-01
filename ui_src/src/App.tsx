@@ -8,6 +8,7 @@ import toWav from 'audiobuffer-to-wav'
 
 let soundFontBuffer: Uint8Array;
 let imgUrl = "./img/cassete.png";
+let selectedRaagID = "120000";
 
 async function getAudioURL(score: WebMscore) {
     const metadata = await score.metadata()
@@ -45,19 +46,22 @@ async function getAudioURL(score: WebMscore) {
 function App() {
 
     const [imageUrl, setImageUrl] = useState(imgUrl);
+    const [raagID, setRaagID] = useState(selectedRaagID);
     const [audioUrl, setAudioUrl] = useState("");
     const audioPlayerRef = useRef(null);
 
     WebMscore.ready.then(async () => {
         console.log('WebMscore is loaded');
         const soundFontURL = './sound/MS%20Basic.sf3';
-        fetch(soundFontURL).then
-        (soudfontData => {
-            soudfontData.arrayBuffer().then(buffer => {
-                soundFontBuffer = new Uint8Array(buffer);
-            });
-
-        })
+        if(!soundFontBuffer){
+            fetch(soundFontURL).then
+            (soudfontData => {
+                soudfontData.arrayBuffer().then(buffer => {
+                    soundFontBuffer = new Uint8Array(buffer);
+                });
+    
+            })
+        }
     })
 
     /*
@@ -79,23 +83,20 @@ function App() {
                 </header>
                 <div className="grid grid-cols-2 gap-4 mb-8">
                     <div>
-                        <label htmlFor="select1" className="block mb-2 font-semibold">Raag</label>
-                        <select id="select1" className="w-full border border-gray-300 rounded-md px-3 py-2">
-                            <option value="1">Yaman</option>
-                            <option value="2">Bilawal</option>
-                            <option value="3">Bhairav</option>
-                            <option value="4">Bhairavi</option>
-                            <option value="5">Bhupali</option>
-                            <option value="6">Baageshri</option>
-                            <option value="7">Khamaj</option>
-                            <option value="8">Malkauns</option>
-
-
+                        <label htmlFor="raag_select" className="block mb-2 font-semibold">Raag</label>
+                        <select id="raag_select" className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                        onChange={event => setRaagID(event.target.value)}
+                                        defaultValue={selectedRaagID}
+                        >
+                            <option value="16000">Bhupali</option>
+                            <option value="33000">Durga</option>
+                            <option value="75000">Malkauns</option>
+                            <option value="120000">Yaman</option>
                         </select>
                     </div>
                     <div>
-                        <label htmlFor="select2" className="block mb-2 font-semibold">Instrument</label>
-                        <select id="select2" className="w-full border border-gray-300 rounded-md px-3 py-2">
+                        <label htmlFor="instrument_select" className="block mb-2 font-semibold">Instrument</label>
+                        <select id="instrument_select" className="w-full border border-gray-300 rounded-md px-3 py-2">
                             <option value="1">Flute</option>
                             <option value="2">Violin</option>
                             <option value="3">Grand Piano</option>
@@ -107,8 +108,8 @@ function App() {
                         <label htmlFor="select3" className="block mb-2 font-semibold">Key/Scale</label>
                         <select id="select3" className="w-full border border-gray-300 rounded-md px-3 py-2">
                             <option value="1">C</option>
-                            <option value="2" selected>C#</option>
-                            <option value="3">D</option>
+                            <option value="2">C#</option>
+                            <option value="3" selected>D</option>
                             <option value="4">D#</option>
                             <option value="5">E</option>
                             <option value="6">F</option>
@@ -129,7 +130,7 @@ function App() {
                             onClick={() => {
 
                                 console.log("Fething Tune from API");
-                                const api_url = 'http://localhost:8000/malkauns';
+                                const api_url = `http://localhost:8000/GenerateTune/Raag/${raagID}/Instrument/2`;
                                 fetch(api_url, {method: 'GET'})
                                     .then(response => response.json())
                                     .then(data => {
