@@ -8,7 +8,7 @@ import toWav from 'audiobuffer-to-wav'
 
 let imgUrl = "./img/cassete.png";
 let selectedRaagID = "120000";
-let selectedInstrumentID = "3";
+let selectedInstrumentID = "1";
 
 function loadSoundData(){
     let winRef:any = window;
@@ -127,23 +127,7 @@ function App() {
 
                         </select>
                     </div>
-                    <div>
-                        <label htmlFor="select3" className="block mb-2 font-semibold">Key/Scale</label>
-                        <select id="select3" className="w-full border border-gray-300 rounded-md px-3 py-2">
-                            <option value="1">C</option>
-                            <option value="2">C#</option>
-                            <option value="3">D</option>
-                            <option value="4">D#</option>
-                            <option value="5">E</option>
-                            <option value="6">F</option>
-                            <option value="7">F#</option>
-                            <option value="8">G</option>
-                            <option value="9">G#</option>
-                            <option value="10">A</option>
-                            <option value="11">A#</option>
-                            <option value="12">B</option>
-                        </select>
-                    </div>
+
                     <div>
 
                     </div>
