@@ -1,7 +1,10 @@
 import random
+import string
 
-from MusicNotes import ChordGen
+from MusicNotes import ChordGen, Instrument
 from musictree import Score, Part
+from musicxml.xmlelement.xmlelement import XMLPartList, XMLScorePart, XMLScoreInstrument, XMLInstrumentName, \
+    XMLInstrumentSound
 
 
 def get_note(hindi_note, hindi_to_western_mapping, octave, duration):
@@ -17,7 +20,7 @@ class BaseRaag:
         self.samvadi = samvadi
         self.raag_notes = raag_notes
 
-    def getTune(self, base_scale):
+    def getTune(self, base_scale, instrument_id: int):
         octave_offset = {'D': 0, 'D#': 0, 'E': 0, 'F': 0, 'F#': 0, 'G': 0, 'G#': 0,
                          'A': 1, 'A#': 1, 'B': 1, 'C': 1, 'C#': 1}
         hindi_notes = self.raag_notes
@@ -112,6 +115,7 @@ class BaseRaag:
                 note.add_lyric(hindi_note)
                 p.add_chord(note)
 
+        self.add_instrument_data(scr, p, instrument_id)
         ret = scr.get_xml_string()
 
         p.id_.delete()
@@ -127,3 +131,26 @@ class BaseRaag:
             for note in western_notes:
                 if note not in weights.keys():
                     weights[note] = 0
+
+    def add_instrument_data(self, scr: Score, p: Part, instrument_id: int):
+        music_xml_id = 'I' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+        instrument = Instrument().get_instrument(instrument_id)
+        instrument_name = instrument['name']
+        instrument_sound = instrument['sound_id']
+        xml = scr.xml_object
+        children = xml.get_children()
+        for c in children:
+            if isinstance(c, XMLPartList):
+                # print("Got part list")
+                pl_children = c.get_children()
+                for pl_c in pl_children:
+                    if isinstance(pl_c, XMLScorePart):
+                        # print(pl_c.possible_children_names)
+                        inst = XMLScoreInstrument()
+                        inst.id = music_xml_id
+                        inst_name = XMLInstrumentName(instrument_name)
+                        inst_sound = XMLInstrumentSound(instrument_sound)
+                        inst.add_child(inst_name)
+                        inst.add_child(inst_sound)
+                        pl_c.add_child(inst)
+                        # XMLScoreInstrument
