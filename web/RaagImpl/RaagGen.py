@@ -147,4 +147,4 @@ class RaagGen():
         if raag_id not in self.implemented_raag:
             raise Exception("Raag not implemented " + str(raag_id))
         r: BaseRaag = self.idx[raag_id]['gen']
-        return r.getTune('D')
+        return r.getTune('D', instrument_id)

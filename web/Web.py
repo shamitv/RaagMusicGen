@@ -27,6 +27,7 @@ RaagApp.mount("/ui", StaticFiles(directory="./ui_src/dist/", html=True), name="u
 
 Raag = RaagGen()
 
+
 @RaagApp.get("/api1")
 def root_hello():
     return {"Hello": "World"}
@@ -40,5 +41,5 @@ def malkauns():
 
 @RaagApp.get("/GenerateTune/Raag/{raag_id}/Instrument/{instrument_id}")
 def generate_tune(raag_id: int, instrument_id: int):
-    xml, notes, note_weights = Raag.get_tune(raag_id,instrument_id)
+    xml, notes, note_weights = Raag.get_tune(raag_id, instrument_id)
     return {"xml": xml, "notes": notes, "note_weights": note_weights}

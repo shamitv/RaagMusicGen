@@ -9,7 +9,7 @@ import toWav from 'audiobuffer-to-wav'
 let soundFontBuffer: Uint8Array;
 let imgUrl = "./img/cassete.png";
 let selectedRaagID = "120000";
-
+let selectedInstrumentID = "3";
 async function getAudioURL(score: WebMscore) {
     const metadata = await score.metadata()
     console.log(metadata)
@@ -21,7 +21,7 @@ async function getAudioURL(score: WebMscore) {
     const audioCtx = new (AudioContext || AudioContext)()
     const audioBuf = audioCtx.createBuffer(CHANNELS, (metadata.duration + 1) * 44100, 44100)
 
-
+    
     const fn = await score.synthAudio(0)
     for (let i = 0; ; i += FRAME_LENGTH) {
         const res = await fn()
@@ -47,17 +47,19 @@ function App() {
 
     const [imageUrl, setImageUrl] = useState(imgUrl);
     const [raagID, setRaagID] = useState(selectedRaagID);
+    const [instumentID, setInstrumentID] = useState(selectedInstrumentID);
     const [audioUrl, setAudioUrl] = useState("");
     const audioPlayerRef = useRef(null);
 
     WebMscore.ready.then(async () => {
         console.log('WebMscore is loaded');
-        const soundFontURL = './sound/MS%20Basic.sf3';
-        if(!soundFontBuffer){
+        if(!soundFontBuffer || soundFontBuffer.length < 1){
+            const soundFontURL = './sound/MS%20Basic.sf3';
             fetch(soundFontURL).then
             (soudfontData => {
                 soudfontData.arrayBuffer().then(buffer => {
                     soundFontBuffer = new Uint8Array(buffer);
+                    console.log(soundFontBuffer.length)
                 });
     
             })
@@ -96,11 +98,16 @@ function App() {
                     </div>
                     <div>
                         <label htmlFor="instrument_select" className="block mb-2 font-semibold">Instrument</label>
-                        <select id="instrument_select" className="w-full border border-gray-300 rounded-md px-3 py-2">
+                        <select id="instrument_select" className="w-full border border-gray-300 rounded-md px-3 py-2"
+                            onChange={event=>{setInstrumentID(event.target.value)}}
+                            defaultValue={selectedInstrumentID}
+                        >
+                            <option value="0">Guitar</option>
                             <option value="1">Flute</option>
-                            <option value="2">Violin</option>
-                            <option value="3">Grand Piano</option>
+                            <option value="2">Sitar</option>
+                            <option value="3">Piano</option>
                             <option value="4">Harmonium</option>
+                            <option value="5">Violin</option>
 
                         </select>
                     </div>
@@ -109,7 +116,7 @@ function App() {
                         <select id="select3" className="w-full border border-gray-300 rounded-md px-3 py-2">
                             <option value="1">C</option>
                             <option value="2">C#</option>
-                            <option value="3" selected>D</option>
+                            <option value="3">D</option>
                             <option value="4">D#</option>
                             <option value="5">E</option>
                             <option value="6">F</option>
@@ -130,7 +137,7 @@ function App() {
                             onClick={() => {
 
                                 console.log("Fething Tune from API");
-                                const api_url = `http://localhost:8000/GenerateTune/Raag/${raagID}/Instrument/2`;
+                                const api_url = `http://localhost:8000/GenerateTune/Raag/${raagID}/Instrument/${instumentID}`;
                                 fetch(api_url, {method: 'GET'})
                                     .then(response => response.json())
                                     .then(data => {
