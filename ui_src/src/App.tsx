@@ -2,14 +2,33 @@ import './App.css'
 import WebMscore from 'webmscore'
 
 import {useState} from "react";
-import { useRef } from 'react';
+import { useRef }  from 'react';
 
 import toWav from 'audiobuffer-to-wav'
 
-let soundFontBuffer: Uint8Array;
 let imgUrl = "./img/cassete.png";
 let selectedRaagID = "120000";
-let selectedInstrumentID = "3";
+let selectedInstrumentID = "1";
+
+function loadSoundData(){
+    let winRef:any = window;
+    if(winRef.newFontBuffer){
+        console.log('Sounf data availalbe in memory')
+    }else{
+        console.log('Downloading sound data')
+        const fontUrl = "./sound/MS%20Basic.sf3";
+    
+        fetch(fontUrl).then(fontResponse=>{
+            fontResponse.arrayBuffer().then(buffer=>{
+                let fontBuffer = new Uint8Array(buffer);
+                winRef.newFontBuffer = fontBuffer;
+                return fontBuffer;
+            })
+        })
+    }
+}
+
+
 async function getAudioURL(score: WebMscore) {
     const metadata = await score.metadata()
     console.log(metadata)
@@ -45,24 +64,21 @@ async function getAudioURL(score: WebMscore) {
 
 function App() {
 
+    
     const [imageUrl, setImageUrl] = useState(imgUrl);
     const [raagID, setRaagID] = useState(selectedRaagID);
     const [instumentID, setInstrumentID] = useState(selectedInstrumentID);
     const [audioUrl, setAudioUrl] = useState("");
+
     const audioPlayerRef = useRef(null);
+
+    loadSoundData();
 
     WebMscore.ready.then(async () => {
         console.log('WebMscore is loaded');
-        if(!soundFontBuffer || soundFontBuffer.length < 1){
-            const soundFontURL = './sound/MS%20Basic.sf3';
-            fetch(soundFontURL).then
-            (soudfontData => {
-                soudfontData.arrayBuffer().then(buffer => {
-                    soundFontBuffer = new Uint8Array(buffer);
-                    console.log(soundFontBuffer.length)
-                });
-    
-            })
+        let winRef:any = window;
+        if(winRef.newFontBuffer && winRef.newFontBuffer.length > 1){
+            console.log("Sound data availalbe in memory");
         }
     })
 
@@ -111,23 +127,7 @@ function App() {
 
                         </select>
                     </div>
-                    <div>
-                        <label htmlFor="select3" className="block mb-2 font-semibold">Key/Scale</label>
-                        <select id="select3" className="w-full border border-gray-300 rounded-md px-3 py-2">
-                            <option value="1">C</option>
-                            <option value="2">C#</option>
-                            <option value="3">D</option>
-                            <option value="4">D#</option>
-                            <option value="5">E</option>
-                            <option value="6">F</option>
-                            <option value="7">F#</option>
-                            <option value="8">G</option>
-                            <option value="9">G#</option>
-                            <option value="10">A</option>
-                            <option value="11">A#</option>
-                            <option value="12">B</option>
-                        </select>
-                    </div>
+
                     <div>
 
                     </div>
@@ -137,7 +137,7 @@ function App() {
                             onClick={() => {
 
                                 console.log("Fething Tune from API");
-                                const api_url = `http://localhost:8000/GenerateTune/Raag/${raagID}/Instrument/${instumentID}`;
+                                const api_url = `/GenerateTune/Raag/${raagID}/Instrument/${instumentID}`;
                                 fetch(api_url, {method: 'GET'})
                                     .then(response => response.json())
                                     .then(data => {
@@ -151,7 +151,9 @@ function App() {
                                                 console.log("Score loaded, fetching metadata");
                                                 score.metadata().then(meta => {
                                                     console.log(meta)
-                                                    score.setSoundFont(soundFontBuffer)
+                                                    let winRef:any = window;
+                                                    let newBuf:Uint8Array = winRef.newFontBuffer.slice()
+                                                    score.setSoundFont(newBuf)
                                                     console.log("Rendering SVG")
                                                     score.saveSvg(0, false).then(svg => {
                                                         console.log("Got SVG, displaying it")

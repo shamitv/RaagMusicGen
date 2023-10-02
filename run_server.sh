@@ -19,4 +19,4 @@ export PYTHONPATH="$PYTHONPATH:$dir"
 #Source env from python virtual env
 source "$dir/venv/bin/activate"
 
-uvicorn web:RaagApp
+uvicorn --host 0.0.0.0 --port 9060  web:RaagApp
