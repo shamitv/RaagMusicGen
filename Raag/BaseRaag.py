@@ -22,7 +22,7 @@ class BaseRaag:
 
     def getTune(self, base_scale, instrument_id: int):
         octave_offset = {'D': 0, 'D#': 0, 'E': 0, 'F': 0, 'F#': 0, 'G': 0, 'G#': 0,
-                         'A': 1, 'A#': 1, 'B': 1, 'C': 1, 'C#': 1}
+                         'A': 0, 'A#': 0, 'B': 0, 'C': 0, 'C#': 0}
         hindi_notes = self.raag_notes
         scale_notes = ChordGen.get_western_notes(hindi_notes, base_scale)
         hindi_to_western_mapping = {}
