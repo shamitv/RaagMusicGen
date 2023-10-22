@@ -2,7 +2,7 @@ import './App.css'
 import WebMscore from 'webmscore'
 
 import {useState} from "react";
-import { useRef }  from 'react';
+import {useRef}  from 'react';
 
 import toWav from 'audiobuffer-to-wav'
 
@@ -10,23 +10,28 @@ let imgUrl = "./img/cassete.png";
 let selectedRaagID = "120000";
 let selectedInstrumentID = "1";
 
-function loadSoundData(){
+let soundDataAvailable = false;
+
+async function loadSoundData():Promise<boolean>{
     let winRef:any = window;
     if(winRef.newFontBuffer){
-        console.log('Sounf data availalbe in memory')
+        console.log('Sound data availalbe in memory')
+        soundDataAvailable = true;
+        return soundDataAvailable;
     }else{
         console.log('Downloading sound data')
         const fontUrl = "./sound/MS%20Basic.sf3";
     
-        fetch(fontUrl).then(fontResponse=>{
-            fontResponse.arrayBuffer().then(buffer=>{
-                let fontBuffer = new Uint8Array(buffer);
-                winRef.newFontBuffer = fontBuffer;
-                return fontBuffer;
-            })
-        })
+        const fontResponse = await fetch(fontUrl)
+        const buffer = await fontResponse.arrayBuffer()
+        let fontBuffer = new Uint8Array(buffer);
+        winRef.newFontBuffer = fontBuffer;
+        soundDataAvailable = true;
+       return soundDataAvailable;
     }
+    
 }
+
 
 
 async function getAudioURL(score: WebMscore) {
@@ -46,7 +51,7 @@ async function getAudioURL(score: WebMscore) {
         const res = await fn()
         const frames = new Float32Array(res.chunk.buffer)
 
-        // audio frames are non-interleaved
+          // audio frames are non-interleaved
         // Float32Array[ channelA 512 frames, channelB 512 frames ]
         for (let c = 0; c < CHANNELS; c++) {
             const buf = frames.subarray(c * FRAME_LENGTH, (c + 1) * FRAME_LENGTH)
@@ -62,6 +67,35 @@ async function getAudioURL(score: WebMscore) {
     return url;
 }
 
+async function generateTune(raag:number , instrument:number):Promise<any>{
+    console.log("Fething Tune from API");
+    const api_url = `/GenerateTune/Raag/${raag}/Instrument/${instrument}`;
+    const resp = await fetch(api_url,{method: 'GET'})
+    const data = await resp.json()
+    var xml = data.xml;
+    console.log("Got XML");
+    var enc = new TextEncoder();
+    var xmlBuffer = enc.encode(xml)
+    var score = await WebMscore.load('xml', xmlBuffer, [], false)
+    console.log("Score loaded, fetching metadata");
+    var meta = await score.metadata()
+    let winRef:any = window;
+    let newBuf:Uint8Array = winRef.newFontBuffer.slice()
+    score.setSoundFont(newBuf)
+    console.log("Rendering SVG")
+    let svg = await score.saveSvg(0,false)
+    console.log("Got SVG")
+    let blob = new Blob([svg], {type: 'image/svg+xml'});
+    let imgUrl = URL.createObjectURL(blob);
+    console.log(imgUrl)
+    let audioUrl = await getAudioURL(score)
+    var ret:any = {}
+    ret['imgUrl'] = imgUrl;
+    ret['meta'] = meta;
+    ret['audioUrl'] = audioUrl;
+    return ret;
+}
+
 function App() {
 
     
@@ -69,17 +103,16 @@ function App() {
     const [raagID, setRaagID] = useState(selectedRaagID);
     const [instumentID, setInstrumentID] = useState(selectedInstrumentID);
     const [audioUrl, setAudioUrl] = useState("");
+    const [soundDataState, setSoundDataState] = useState(soundDataAvailable);
+
 
     const audioPlayerRef = useRef(null);
 
-    loadSoundData();
+    loadSoundData().then((value) => {setSoundDataState(value)})
+    
 
     WebMscore.ready.then(async () => {
         console.log('WebMscore is loaded');
-        let winRef:any = window;
-        if(winRef.newFontBuffer && winRef.newFontBuffer.length > 1){
-            console.log("Sound data availalbe in memory");
-        }
     })
 
     /*
@@ -134,49 +167,21 @@ function App() {
                 </div>
                 <div className="mb-8">
                     <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+                            disabled={!soundDataState}
                             onClick={() => {
-
-                                console.log("Fething Tune from API");
-                                const api_url = `/GenerateTune/Raag/${raagID}/Instrument/${instumentID}`;
-                                fetch(api_url, {method: 'GET'})
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        console.log(data)
-                                        var xml = data.xml
-                                        console.log("Got XML");
-                                        var enc = new TextEncoder();
-                                        var xmlBuffer = enc.encode(xml)
-                                        WebMscore.load('xml', xmlBuffer, [], false)
-                                            .then(score => {
-                                                console.log("Score loaded, fetching metadata");
-                                                score.metadata().then(meta => {
-                                                    console.log(meta)
-                                                    let winRef:any = window;
-                                                    let newBuf:Uint8Array = winRef.newFontBuffer.slice()
-                                                    score.setSoundFont(newBuf)
-                                                    console.log("Rendering SVG")
-                                                    score.saveSvg(0, false).then(svg => {
-                                                        console.log("Got SVG, displaying it")
-                                                        let blob = new Blob([svg], {type: 'image/svg+xml'});
-                                                        let url = URL.createObjectURL(blob);
-                                                        setImageUrl(url)
-                                                        console.log(imgUrl)
-                                                        getAudioURL(score).then(url => {
-                                                            console.log(url)
-                                                            setAudioUrl(url)
-                                                            if(audioPlayerRef.current != null){
-                                                                let tempVar:any = audioPlayerRef.current;
-                                                                tempVar.load();
-                                                                tempVar.play();
-                                                            }
-                                                        })
-                                                    })
-                                                })
-                                            })
-                                    })
+                                let resp = generateTune(parseInt(raagID),parseInt(instumentID))
+                                resp.then(values => {
+                                    setImageUrl(values['imgUrl'])
+                                    setAudioUrl(values['audioUrl'])
+                                    if(audioPlayerRef.current != null){
+                                        let audioRef:any = audioPlayerRef.current
+                                        audioRef.load();
+                                        audioRef.play();
+                                    }
+                                })
 
 
-                            }}>Generate Tune
+                            }}>{soundDataState ? "Generate Tune" : "Initializing..."}
                     </button>
                 </div>
                 <audio controls className="w-full" ref={audioPlayerRef}>
