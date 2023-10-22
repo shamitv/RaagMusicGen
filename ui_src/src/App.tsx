@@ -108,7 +108,10 @@ function App() {
 
     const audioPlayerRef = useRef(null);
 
-    loadSoundData().then((value) => {setSoundDataState(value)})
+    if(!soundDataState){
+        loadSoundData().then((value) => {setSoundDataState(value)})
+    }
+    
     
 
     WebMscore.ready.then(async () => {
@@ -167,7 +170,7 @@ function App() {
                 </div>
                 <div className="mb-8">
                     <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-                            disabled={!soundDataState}
+                            
                             onClick={() => {
                                 let resp = generateTune(parseInt(raagID),parseInt(instumentID))
                                 resp.then(values => {
