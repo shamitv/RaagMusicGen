@@ -3,6 +3,11 @@ import WebMscore from 'webmscore'
 
 import {useState} from "react";
 import {useRef}  from 'react';
+import ReactGA from "react-ga4";
+
+ReactGA.initialize("G-GSS7C0CEKM");
+
+ReactGA.send({hitType:"pageview"})
 
 import toWav from 'audiobuffer-to-wav'
 
@@ -15,11 +20,15 @@ let soundDataAvailable = false;
 async function loadSoundData():Promise<boolean>{
     let winRef:any = window;
     if(winRef.newFontBuffer){
-        console.log('Sound data availalbe in memory')
+        var msg = 'Sound data availalbe in memory'
+        ReactGA.event({category:"AppInit",action:msg})
+        console.log(msg)
         soundDataAvailable = true;
         return soundDataAvailable;
     }else{
-        console.log('Downloading sound data')
+        var msg = 'Downloading sound data'
+        ReactGA.event({category:"AppInit",action:msg})
+        console.log(msg)
         const fontUrl = "./sound/MS%20Basic.sf3";
     
         const fontResponse = await fetch(fontUrl)
@@ -29,7 +38,7 @@ async function loadSoundData():Promise<boolean>{
         soundDataAvailable = true;
        return soundDataAvailable;
     }
-    
+  
 }
 
 
@@ -68,7 +77,9 @@ async function getAudioURL(score: WebMscore) {
 }
 
 async function generateTune(raag:number , instrument:number):Promise<any>{
-    console.log("Fething Tune from API");
+    var msg = '"Fetching Tune from API"'
+    ReactGA.event({category:"AppInit",action:msg})
+    console.log(msg)
     const api_url = `/GenerateTune/Raag/${raag}/Instrument/${instrument}`;
     const resp = await fetch(api_url,{method: 'GET'})
     const data = await resp.json()
