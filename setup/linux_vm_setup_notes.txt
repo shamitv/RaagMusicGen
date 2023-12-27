@@ -1,0 +1,33 @@
+1. Create a new Ubuntu VM (these steps were tested on Ubuntu 22, should not be specific to Ubuntu version)
+2. sudo apt update and sudo apt upgrade to get latest versions of default packages
+3. Install nginx
+    sudo apt install nginx -y
+    #Enable port 80 from Firewall
+    sudo ufw allow 'Nginx HTTP'
+4. Modify default "site" for nginx at
+    sudo nano /etc/nginx/sites-available/default
+
+    Comment line "root /var/www/html;"
+
+    Change location "/" to be a reverse proxy.
+        Delete or comment all content in curly brace for location /
+        Add following
+            proxy_pass http://localhost:9060/;
+              proxy_buffering off;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-Host $host;
+              proxy_set_header X-Forwarded-Port $server_port;
+5. Clone repo
+    git clone https://github.com/shamitv/RaagMusicGen.git
+6. Setup python venv in "venv" directory inside RaagMusicGen. Server start script expects this location
+    cd RaagMusicGen
+    sudo apt install python3.10-venv -y
+    python3 -m venv venv
+    source ./venv/bin/activate
+    pip3 install  -r ./setup/requirements.txt
+7. Run server
+    bash ./run_server.sh
+8. Restart nginx to reload config
+    sudo service nginx configtest
+    sudo service nginx restart
+
