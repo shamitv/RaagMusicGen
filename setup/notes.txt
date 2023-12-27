@@ -1,8 +1,28 @@
 
-
+Nginx : Add following config to send all requests to FastAPI
 
             proxy_set_header    Host $host;
             proxy_set_header    X-Real-IP   $remote_addr;
             proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass  http://127.0.0.1:9060;
+
+Build UI :
+    npx vite build
+
+    This will build static files in ./ui_src/dist directory. 
+    index.html needs to be updated to refer to js and css via relative paths 
+    Manually chage reference to static files in index.html , make the reference relative 
+
+    For example : 
+            Following should be changed to 
+                <script type="module" crossorigin src="/assets/index-d9396fe8.js"></script>
+                <link rel="stylesheet" href="/assets/index-334e98ca.css">
+            
+            to
+
+                <script type="module" crossorigin src="./assets/index-d9396fe8.js"></script>
+                <link rel="stylesheet" href="./assets/index-334e98ca.css">
+
+            This change makes href relative to current dir 
+
 
