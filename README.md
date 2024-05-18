@@ -2,7 +2,7 @@
 
 Demo :
 
-http://raag.shamit.in/ui 
+https://raag.shamit-cloud.com/ui/ 
 
 Local installation :
 
