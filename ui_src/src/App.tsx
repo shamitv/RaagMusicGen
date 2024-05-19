@@ -4,16 +4,16 @@ import WebMscore from 'webmscore'
 import {useState} from "react";
 import {useRef}  from 'react';
 import ReactGA from "react-ga4";
+import toWav from 'audiobuffer-to-wav'
 
 ReactGA.initialize("G-GSS7C0CEKM");
 
 ReactGA.send({hitType:"pageview"})
 
-import toWav from 'audiobuffer-to-wav'
 
 let imgUrl = "./img/cassete.png";
 let selectedRaagID = "120000";
-let selectedInstrumentID = "1";
+let selectedInstrumentID = "3";
 
 let soundDataAvailable = false;
 
@@ -29,7 +29,7 @@ async function loadSoundData():Promise<boolean>{
         var msg = 'Downloading sound data'
         ReactGA.event({category:"AppInit",action:msg})
         console.log(msg)
-        const fontUrl = "./sound/MS%20Basic.sf3";
+        const fontUrl = "./sound/Emu 9ftgrand-small.sf3";
     
         const fontResponse = await fetch(fontUrl)
         const buffer = await fontResponse.arrayBuffer()
@@ -41,7 +41,14 @@ async function loadSoundData():Promise<boolean>{
   
 }
 
+async function getMidiAudioURL(score: WebMscore) {
 
+    let midi:Uint8Array = await score.saveMidi()
+    console.log("Got Midi "+midi.length)
+    const blob = new Blob([midi], {type: "audio/midi"});
+    const url = window.URL.createObjectURL(blob);
+    return url;
+}
 
 async function getAudioURL(score: WebMscore) {
     const metadata = await score.metadata()
@@ -54,7 +61,7 @@ async function getAudioURL(score: WebMscore) {
     const audioCtx = new (AudioContext || AudioContext)()
     const audioBuf = audioCtx.createBuffer(CHANNELS, (metadata.duration + 1) * 44100, 44100)
 
-    
+
     const fn = await score.synthAudio(0)
     for (let i = 0; ; i += FRAME_LENGTH) {
         const res = await fn()
@@ -100,10 +107,15 @@ async function generateTune(raag:number , instrument:number):Promise<any>{
     let imgUrl = URL.createObjectURL(blob);
     console.log(imgUrl)
     let audioUrl = await getAudioURL(score)
+    console.log("Got Audio Data")
+    let midiUrl = await  getMidiAudioURL(score)
+    console.log("Got MIDI Data")
+    console.log(audioUrl)
     var ret:any = {}
     ret['imgUrl'] = imgUrl;
     ret['meta'] = meta;
     ret['audioUrl'] = audioUrl;
+    ret['midiUrl'] = midiUrl;
     return ret;
 }
 
@@ -139,6 +151,8 @@ function App() {
     There is an audio player
 
     */
+    // @ts-ignore
+    // @ts-ignore
     return (
         <div id="ui-container" className="h-auto min-h-screen grid justify-center items-center">
             <div className="max-w-3xl mx-auto p-8 bg-white rounded-md shadow-md">
@@ -165,13 +179,7 @@ function App() {
                             onChange={event=>{setInstrumentID(event.target.value)}}
                             defaultValue={selectedInstrumentID}
                         >
-                            <option value="0">Guitar</option>
-                            <option value="1">Flute</option>
-                            <option value="2">Sitar</option>
                             <option value="3">Piano</option>
-                            <option value="4">Harmonium</option>
-                            <option value="5">Violin</option>
-
                         </select>
                     </div>
 
