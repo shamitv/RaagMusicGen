@@ -87,7 +87,7 @@ async function generateTune(raag:number , instrument:number):Promise<any>{
     var msg = '"Fetching Tune from API"'
     ReactGA.event({category:"AppInit",action:msg})
     console.log(msg)
-    const api_url = `http://i3tiny1:9060/GenerateTune/Raag/${raag}/Instrument/${instrument}`;
+    const api_url = `/GenerateTune/Raag/${raag}/Instrument/${instrument}`;
     const resp = await fetch(api_url,{method: 'GET'})
     const data = await resp.json()
     var xml = data.xml;
