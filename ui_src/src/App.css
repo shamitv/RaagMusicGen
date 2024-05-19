@@ -9,3 +9,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.button {
+  background-color: #4299e1; /* A shade of blue */
+  color: white;
+  font-weight: 600; /* semi-bold font */
+  padding: 0.5rem 1rem; /* vertical and horizontal padding */
+  border-radius: 0.25rem; /* border radius */
+  transition: background-color 0.3s ease; /* for smooth color transition on hover */
+}
+
+.button-disabled {
+  background-color: gray;
+  cursor: not-allowed;
+  color: #6c757d;
+}
+
+.button-enabled {
+  background-color: blue;
+  color: white;
+  cursor: pointer;
+}
+
+.button-enabled:hover {
+  background-color: lightblue;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem; /* Added to simulate  mb-8 margin style from Tailwind CSS */
+}
