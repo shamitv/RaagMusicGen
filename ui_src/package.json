@@ -10,9 +10,13 @@
     "preview": "../../rnd/react-learn/node_modules/.bin/vite preview"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.5.2",
+    "@fortawesome/react-fontawesome": "^0.2.1",
     "@types/audiobuffer-to-wav": "^1.0.2",
     "audiobuffer-to-wav": "^1.0.0",
     "file-saver": "^2.0.5",
+    "js-file-download": "^0.4.12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-ga4": "^2.1.0",

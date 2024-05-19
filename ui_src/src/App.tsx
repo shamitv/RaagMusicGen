@@ -5,6 +5,8 @@ import {useState} from "react";
 import {useRef}  from 'react';
 import ReactGA from "react-ga4";
 import toWav from 'audiobuffer-to-wav'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
 
 ReactGA.initialize("G-GSS7C0CEKM");
 
@@ -83,6 +85,16 @@ async function getAudioURL(score: WebMscore) {
     return url;
 }
 
+
+async function getMusicXMLURL(xml:string){
+    let enc = new TextEncoder();
+    let xmlBuffer = enc.encode(xml)
+    const blob = new Blob([xmlBuffer], { type: "application/xml" });
+    let blobSize = blob.size
+    console.log("Size of XML Blob :"+blobSize)
+    const url = URL.createObjectURL(blob);
+    return url
+}
 async function generateTune(raag:number , instrument:number):Promise<any>{
     var msg = '"Fetching Tune from API"'
     ReactGA.event({category:"AppInit",action:msg})
@@ -110,12 +122,14 @@ async function generateTune(raag:number , instrument:number):Promise<any>{
     console.log("Got Audio Data")
     let midiUrl = await  getMidiAudioURL(score)
     console.log("Got MIDI Data")
-    console.log(audioUrl)
-    var ret:any = {}
+    let xmlUrl=await getMusicXMLURL(xml)
+
+    let ret:any = {}
     ret['imgUrl'] = imgUrl;
     ret['meta'] = meta;
     ret['audioUrl'] = audioUrl;
     ret['midiUrl'] = midiUrl;
+    ret['musicXmlUrl'] = xmlUrl;
     return ret;
 }
 
@@ -127,7 +141,10 @@ function App() {
     const [instumentID, setInstrumentID] = useState(selectedInstrumentID);
     const [audioUrl, setAudioUrl] = useState("");
     const [soundDataState, setSoundDataState] = useState(soundDataAvailable);
-
+    const [midiUrl, setMidiUrl] = useState('');
+    const [musicXmlUrl, setMusicXmlUrl] = useState('');
+    const midiDownloadLinkRef = useRef(null);
+    const xmlDownloadLinkRef = useRef(null);
 
     const audioPlayerRef = useRef(null);
 
@@ -187,16 +204,18 @@ function App() {
 
                     </div>
                 </div>
-                <div className="mb-8">
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-                            
+                <div className="button-container">
+                    <button className={`button ${false ? "button-disabled" : "button-enabled"}`}
+
                             onClick={() => {
-                                let resp = generateTune(parseInt(raagID),parseInt(instumentID))
+                                let resp = generateTune(parseInt(raagID), parseInt(instumentID))
                                 resp.then(values => {
                                     setImageUrl(values['imgUrl'])
                                     setAudioUrl(values['audioUrl'])
-                                    if(audioPlayerRef.current != null){
-                                        let audioRef:any = audioPlayerRef.current
+                                    setMidiUrl(values['midiUrl'])
+                                    setMusicXmlUrl(values['musicXmlUrl'])
+                                    if (audioPlayerRef.current != null) {
+                                        let audioRef: any = audioPlayerRef.current
                                         audioRef.load();
                                         audioRef.play();
                                     }
@@ -205,6 +224,36 @@ function App() {
 
                             }}>{soundDataState ? "Generate Tune" : "Initializing..."}
                     </button>
+                    <a href={midiUrl} ref={midiDownloadLinkRef} download="tune.mid" style={{display: 'none'}}>Download
+                        MID file</a>
+                    <button disabled={false} className={`button ${false ? "button-disabled" : "button-enabled"}`}
+                            onClick={() => {
+                                console.log("Will Download Midi")
+                                // @ts-ignore
+                                midiDownloadLinkRef.current.click()
+                            }}>
+                        <span style={{marginLeft: '0.5rem'}}>MIDI File</span>
+                        <FontAwesomeIcon icon={faDownload}
+                                         style={{marginRight: '0.5rem'}}/>
+                    </button>
+
+                    <a href={musicXmlUrl} ref={xmlDownloadLinkRef} download="tune.musicxml" style={{display: 'none'}}>Download
+                        Music file</a>
+
+
+                    <button disabled={false} className={`button ${false ? "button-disabled" : "button-enabled"}`}
+                            onClick={() => {
+                                console.log("Will Download Music XML")
+                                if(xmlDownloadLinkRef){
+                                    // @ts-ignore
+                                    xmlDownloadLinkRef.current.click()
+                                }
+
+                            }}>{"Music File  "}
+                        <FontAwesomeIcon icon={faDownload}
+                                         style={{marginRight: '0.5rem'}}/>
+                    </button>
+
                 </div>
                 <audio controls className="w-full" ref={audioPlayerRef}>
                     <source src={audioUrl}/>
