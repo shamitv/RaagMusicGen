@@ -71,3 +71,19 @@
 - Assign UI dependency lead (frontend team).
 - File follow-up tasks: `npm scripts cleanup`, `TypeScript upgrade`, `PostCSS upgrade`, `Dependabot setup`.
 - Review plan quarterly; update this document with completion notes and new findings.
+
+## Decision — Root manifest consolidation (Option A)
+Choice made: Option A — remove the root `package.json` and `package-lock.json`, and treat `ui_src/package.json` as the single source-of-truth for frontend dependencies.
+
+Rationale:
+- Scanning the repository showed React and ReactDOM are only imported under `ui_src` (for example `ui_src/src/main.tsx`, `ui_src/src/App.tsx`). No other project code depends on the root manifest.
+- The root manifest contained duplicate entries for `react`, `react-dom`, and types which creates maintenance burden and potential confusion for installs and CI.
+- The repo is not currently structured as a monorepo; converting to a workspace (Option B) is feasible but adds CI/tooling work that we do not need right now.
+
+Files removed:
+- `package.json` (root)
+- `package-lock.json` (root)
+
+Commit used: "chore(deps): consolidate root package.json"
+
+If later we adopt multiple top-level packages, we can convert the repo to an npm/pnpm workspace and add back a root manifest with a `workspaces` array.
