@@ -39,13 +39,21 @@
 
 ## Actionable Steps
 1. Audit whether the root `package.json` is required and either remove duplicate dependencies or convert the repo into a managed workspace (npm or pnpm).
+	- Commit after completion: "chore(deps): consolidate root package.json"
 2. Replace the UI `scripts` section with local binary calls (`vite`, `tsc`, `eslint`) and verify they run under `npm run`.
+	- Commit after completion: "chore(scripts): use local binaries for vite/tsc/eslint"
 3. Upgrade `typescript` to >=5.7 and keep `@typescript-eslint` packages in lockstep; rerun lint/build to capture type regressions.
+	- Commit after completion: "chore(deps): upgrade TypeScript and @typescript-eslint"
 4. Update `postcss` to 8.4.49+ and `autoprefixer` to 10.4.20+; run the Tailwind build to confirm compatibility.
+	- Commit after completion: "chore(deps): upgrade postcss and autoprefixer"
 5. Evaluate the necessity of `js-file-download` and `file-saver`; replace with native download logic and remove unused packages.
+	- Commit after completion: "refactor: replace js-file-download/file-saver with native download helper"
 6. Review `audiobuffer-to-wav` maintenance status; prototype an alternative or fork if upstream remains inactive.
+	- Commit after completion: "chore(audio): replace or fork audiobuffer-to-wav"
 7. Validate `react-ga4` usage against the latest GA4 API; ensure configuration supports upcoming measurement features.
+	- Commit after completion: "chore(analytics): validate react-ga4 configuration"
 8. Enable automated dependency monitoring (Dependabot or Renovate for npm) and add `npm audit` to CI to surface vulnerabilities promptly.
+	- Commit after completion: "ci(deps): enable dependabot and npm audit in CI"
 
 ## Execution Plan 2025
 - **Q1**: Inventory validation; add dependency audit CI jobs; refactor npm scripts; migrate to UI-specific lockfiles (`package-lock.json` in `ui_src`).
