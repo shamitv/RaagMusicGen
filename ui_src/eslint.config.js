@@ -3,8 +3,8 @@ import path from 'path'
 
 const tsconfigPath = path.resolve(process.cwd(), 'tsconfig.json')
 
-export default {
-  root: true,
+export default [
+  {
   languageOptions: {
     parser: '@typescript-eslint/parser',
     parserOptions: {
@@ -31,17 +31,16 @@ export default {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
   },
-  overrides: [
-    {
-      files: ['*.ts', '*.tsx'],
-      languageOptions: {
-        parser: '@typescript-eslint/parser',
-      },
-      extends: [
-        'eslint:recommended',
-        'plugin:@typescript-eslint/recommended',
-        'plugin:react-hooks/recommended'
-      ],
-    },
+},
+{
+  files: ['*.ts', '*.tsx'],
+  languageOptions: {
+    parser: '@typescript-eslint/parser',
+  },
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:react-hooks/recommended'
   ],
 }
+]
