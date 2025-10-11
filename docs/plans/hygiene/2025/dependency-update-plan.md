@@ -94,6 +94,8 @@ If later we adopt multiple top-level packages, we can convert the repo to an npm
 - Completed: TypeScript/ESLint alignment and local lint config for ESLint v9. Typecheck, lint, and build verified.
 - Completed: PostCSS and Autoprefixer bumped and verified the Tailwind build.
 - Completed: Replaced legacy download utilities with a native helper and removed `file-saver`/`js-file-download` from `ui_src` (commit `2549b5f`).
+ - Completed: Replaced legacy download utilities with a native helper and removed `file-saver`/`js-file-download` from `ui_src` (commit `2549b5f`).
+ - Completed: Replaced `audiobuffer-to-wav` with an in-repo `audioBufferToWav` helper (commit `0c32845`).
 
 ## Remaining frontend tasks (implementation plan)
 Each bullet lists the action and the exact commit message that will be used when the step is completed.
@@ -104,8 +106,9 @@ Each bullet lists the action and the exact commit message that will be used when
  	- Commit: `2549b5f`
 
 2. Audio pipeline — remove `audiobuffer-to-wav`
-	- Action: Replace `audiobuffer-to-wav` with a small in-repo `toWav` helper (or a maintained alternative) that converts an AudioBuffer to a WAV blob. Update imports and remove the package.
+	- Action: Replaced `audiobuffer-to-wav` with an in-repo `audioBufferToWav` helper that converts an AudioBuffer to a WAV blob. Updated imports and removed the package.
 	- Commit message: "chore(audio): replace audiobuffer-to-wav with in-repo toWav helper"
+	- Commit: `0c32845`
 
 3. Validate analytics integration
 	- Action: Move GA measurement ID into environment (Vite) using `import.meta.env.VITE_GA_MEASUREMENT_ID`, initialize `react-ga4` only if present, and make sure measurement id is not hard-coded.
