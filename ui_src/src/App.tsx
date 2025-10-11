@@ -9,9 +9,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { downloadFromUrl } from './utils/download';
 
-ReactGA.initialize("G-GSS7C0CEKM");
+const viteEnv = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {}
+const GA_MEASUREMENT_ID = viteEnv.VITE_GA_MEASUREMENT_ID ?? ''
+const analyticsEnabled = Boolean(GA_MEASUREMENT_ID)
 
-ReactGA.send({hitType:"pageview"})
+if (analyticsEnabled) {
+    ReactGA.initialize(GA_MEASUREMENT_ID)
+    ReactGA.send({hitType:"pageview"})
+}
+
+function trackAnalyticsEvent(args: Parameters<typeof ReactGA.event>[0]) {
+    if (!analyticsEnabled) {
+        return
+    }
+    ReactGA.event(args)
+}
 
 
 let imgUrl = "./img/cassete.png";
@@ -28,13 +40,13 @@ async function loadSoundData(): Promise<boolean> {
     const winRef = window as WindowWithNewFont
     if (winRef.newFontBuffer) {
         var msg = 'Sound data availalbe in memory'
-        ReactGA.event({category:"AppInit",action:msg})
+        trackAnalyticsEvent({category:"AppInit",action:msg})
         console.log(msg)
         soundDataAvailable = true;
         return soundDataAvailable;
     }else{
         var msg = 'Downloading sound data'
-        ReactGA.event({category:"AppInit",action:msg})
+        trackAnalyticsEvent({category:"AppInit",action:msg})
         console.log(msg)
         const fontUrl = "./sound/Emu 9ftgrand-small.sf3";
     
@@ -119,16 +131,14 @@ type GeneratedTune = {
 
 async function generateTune(raag: number, instrument: number): Promise<GeneratedTune> {
     var msg = '"Fetching Tune from API"'
-    ReactGA.event({category:"AppInit",action:msg})
+    trackAnalyticsEvent({category:"AppInit",action:msg})
     console.log(msg)
     // Read API base from Vite env (statically inlined at build time). Fall back to same-origin.
-    // Type import.meta.env safely to avoid `any` and satisfy lint rules
-    const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env
     // Default behavior:
-    // - In development, default to http://localhost:8000 when VITE_API_BASE is not set
+    // - In development, default to http://localhost:9060 when VITE_API_BASE is not set
     // - In production, default to same-origin (empty string)
-    const rawApiBase = env?.VITE_API_BASE ?? ''
-    const mode = env?.MODE ?? (process.env.NODE_ENV ?? 'production')
+    const rawApiBase = viteEnv.VITE_API_BASE ?? ''
+    const mode = viteEnv.MODE ?? (process.env.NODE_ENV ?? 'production')
     const API_BASE = rawApiBase || (mode === 'development' ? 'http://localhost:9060' : '')
     // ensure no duplicate slashes when joining
     const base = API_BASE.replace(/\/+$/, '')
