@@ -13,8 +13,9 @@ export default [
     parserOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      project: fs.existsSync(tsconfigPath) ? [tsconfigPath] : undefined,
-      tsconfigRootDir: process.cwd(),
+      // don't provide `project` here - it makes the parser try to type-check
+      // every file (including config and generated files). Provide it only for
+      // TypeScript file overrides below.
     },
   },
   plugins: {
@@ -39,6 +40,10 @@ export default [
   files: ['*.ts', '*.tsx'],
   languageOptions: {
     parser: tsParser,
+    parserOptions: {
+      project: fs.existsSync(tsconfigPath) ? [tsconfigPath] : undefined,
+      tsconfigRootDir: process.cwd(),
+    },
   },
   // instead of 'extends' use plugin-provided configs where possible
   rules: {
