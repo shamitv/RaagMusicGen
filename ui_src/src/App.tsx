@@ -19,9 +19,13 @@ let selectedInstrumentID = "3";
 
 let soundDataAvailable = false;
 
-async function loadSoundData():Promise<boolean>{
-    let winRef:any = window;
-    if(winRef.newFontBuffer){
+interface WindowWithNewFont extends Window {
+    newFontBuffer?: Uint8Array
+}
+
+async function loadSoundData(): Promise<boolean> {
+    const winRef = window as WindowWithNewFont
+    if (winRef.newFontBuffer) {
         var msg = 'Sound data availalbe in memory'
         ReactGA.event({category:"AppInit",action:msg})
         console.log(msg)
@@ -45,9 +49,9 @@ async function loadSoundData():Promise<boolean>{
 
 async function getMidiAudioURL(score: WebMscore) {
 
-    let midi:Uint8Array = await score.saveMidi()
-    console.log("Got Midi "+midi.length)
-    const blob = new Blob([midi], {type: "audio/midi"});
+    let midi: Uint8Array = await score.saveMidi()
+    console.log("Got Midi " + midi.length)
+    const blob = new Blob([midi.buffer as ArrayBuffer], {type: "audio/midi"})
     const url = window.URL.createObjectURL(blob);
     return url;
 }
@@ -67,13 +71,18 @@ async function getAudioURL(score: WebMscore) {
     const fn = await score.synthAudio(0)
     for (let i = 0; ; i += FRAME_LENGTH) {
         const res = await fn()
-        const frames = new Float32Array(res.chunk.buffer)
+        function toArrayBuffer(buf: ArrayBufferLike): ArrayBuffer {
+            if (buf instanceof ArrayBuffer) return buf
+            // SharedArrayBuffer or other ArrayBufferLike - copy into a new ArrayBuffer
+            return buf.slice(0) as unknown as ArrayBuffer
+        }
+        const frames = new Float32Array(toArrayBuffer(res.chunk.buffer))
 
           // audio frames are non-interleaved
         // Float32Array[ channelA 512 frames, channelB 512 frames ]
         for (let c = 0; c < CHANNELS; c++) {
             const buf = frames.subarray(c * FRAME_LENGTH, (c + 1) * FRAME_LENGTH)
-            audioBuf.copyToChannel(buf, c, i)
+            audioBuf.copyToChannel(buf as unknown as Float32Array, c, i)
         }
 
         if (res.done) {
@@ -95,7 +104,15 @@ async function getMusicXMLURL(xml:string){
     const url = URL.createObjectURL(blob);
     return url
 }
-async function generateTune(raag:number , instrument:number):Promise<any>{
+type GeneratedTune = {
+    imgUrl: string
+    meta: unknown
+    audioUrl: string
+    midiUrl: string
+    musicXmlUrl: string
+}
+
+async function generateTune(raag: number, instrument: number): Promise<GeneratedTune> {
     var msg = '"Fetching Tune from API"'
     ReactGA.event({category:"AppInit",action:msg})
     console.log(msg)
@@ -109,8 +126,11 @@ async function generateTune(raag:number , instrument:number):Promise<any>{
     var score = await WebMscore.load('xml', xmlBuffer, [], false)
     console.log("Score loaded, fetching metadata");
     var meta = await score.metadata()
-    let winRef:any = window;
-    let newBuf:Uint8Array = winRef.newFontBuffer.slice()
+    const winRef = window as WindowWithNewFont
+    if (!winRef.newFontBuffer) {
+        throw new Error('sound font not loaded')
+    }
+    let newBuf: Uint8Array = winRef.newFontBuffer.slice()
     score.setSoundFont(newBuf)
     console.log("Rendering SVG")
     let svg = await score.saveSvg(0,false)
@@ -124,29 +144,30 @@ async function generateTune(raag:number , instrument:number):Promise<any>{
     console.log("Got MIDI Data")
     let xmlUrl=await getMusicXMLURL(xml)
 
-    let ret:any = {}
-    ret['imgUrl'] = imgUrl;
-    ret['meta'] = meta;
-    ret['audioUrl'] = audioUrl;
-    ret['midiUrl'] = midiUrl;
-    ret['musicXmlUrl'] = xmlUrl;
-    return ret;
+    const ret: GeneratedTune = {
+        imgUrl,
+        meta,
+        audioUrl,
+        midiUrl,
+        musicXmlUrl: xmlUrl,
+    }
+    return ret
 }
 
 function App() {
 
     
-    const [imageUrl, setImageUrl] = useState(imgUrl);
-    const [raagID, setRaagID] = useState(selectedRaagID);
-    const [instumentID, setInstrumentID] = useState(selectedInstrumentID);
-    const [audioUrl, setAudioUrl] = useState("");
-    const [soundDataState, setSoundDataState] = useState(soundDataAvailable);
-    const [midiUrl, setMidiUrl] = useState('');
-    const [musicXmlUrl, setMusicXmlUrl] = useState('');
-    const midiDownloadLinkRef = useRef(null);
-    const xmlDownloadLinkRef = useRef(null);
+    const [imageUrl, setImageUrl] = useState<string>(imgUrl)
+    const [raagID, setRaagID] = useState<string>(selectedRaagID)
+    const [instumentID, setInstrumentID] = useState<string>(selectedInstrumentID)
+    const [audioUrl, setAudioUrl] = useState<string>('')
+    const [soundDataState, setSoundDataState] = useState<boolean>(soundDataAvailable)
+    const [midiUrl, setMidiUrl] = useState<string>('')
+    const [musicXmlUrl, setMusicXmlUrl] = useState<string>('')
+    const midiDownloadLinkRef = useRef<HTMLAnchorElement | null>(null)
+    const xmlDownloadLinkRef = useRef<HTMLAnchorElement | null>(null)
 
-    const audioPlayerRef = useRef(null);
+    const audioPlayerRef = useRef<HTMLAudioElement | null>(null)
 
     if(!soundDataState){
         loadSoundData().then((value) => {setSoundDataState(value)})
@@ -168,8 +189,7 @@ function App() {
     There is an audio player
 
     */
-    // @ts-ignore
-    // @ts-ignore
+    
     return (
         <div id="ui-container" className="h-auto min-h-screen grid justify-center items-center">
             <div className="max-w-3xl mx-auto p-8 bg-white rounded-md shadow-md">
@@ -207,30 +227,27 @@ function App() {
                 <div className="button-container">
                     <button className={`button ${false ? "button-disabled" : "button-enabled"}`}
 
-                            onClick={() => {
-                                let resp = generateTune(parseInt(raagID), parseInt(instumentID))
-                                resp.then(values => {
-                                    setImageUrl(values['imgUrl'])
-                                    setAudioUrl(values['audioUrl'])
-                                    setMidiUrl(values['midiUrl'])
-                                    setMusicXmlUrl(values['musicXmlUrl'])
-                                    if (audioPlayerRef.current != null) {
-                                        let audioRef: any = audioPlayerRef.current
-                                        audioRef.load();
-                                        audioRef.play();
-                                    }
-                                })
+                                onClick={() => {
+                                    generateTune(parseInt(raagID), parseInt(instumentID)).then(values => {
+                                        setImageUrl(values.imgUrl)
+                                        setAudioUrl(values.audioUrl)
+                                        setMidiUrl(values.midiUrl)
+                                        setMusicXmlUrl(values.musicXmlUrl)
+                                        const audioRef = audioPlayerRef.current
+                                        if (audioRef) {
+                                            audioRef.load()
+                                            // ignore play promise
+                                            void audioRef.play()
+                                        }
+                                    })
 
-
-                            }}>{soundDataState ? "Generate Tune" : "Initializing..."}
-                    </button>
+                                }}>{soundDataState ? 'Generate Tune' : 'Initializing...'}</button>
                     <a href={midiUrl} ref={midiDownloadLinkRef} download="tune.mid" style={{display: 'none'}}>Download
                         MID file</a>
                     <button disabled={false} className={`button ${false ? "button-disabled" : "button-enabled"}`}
                             onClick={() => {
                                 console.log("Will Download Midi")
-                                // @ts-ignore
-                                midiDownloadLinkRef.current.click()
+                                midiDownloadLinkRef.current?.click()
                             }}>
                         <span style={{marginLeft: '0.5rem'}}>MIDI File</span>
                         <FontAwesomeIcon icon={faDownload}
@@ -244,10 +261,7 @@ function App() {
                     <button disabled={false} className={`button ${false ? "button-disabled" : "button-enabled"}`}
                             onClick={() => {
                                 console.log("Will Download Music XML")
-                                if(xmlDownloadLinkRef){
-                                    // @ts-ignore
-                                    xmlDownloadLinkRef.current.click()
-                                }
+                                xmlDownloadLinkRef.current?.click()
 
                             }}>{"Music File  "}
                         <FontAwesomeIcon icon={faDownload}
