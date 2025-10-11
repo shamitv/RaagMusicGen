@@ -38,12 +38,12 @@ export default [
 {
   files: ['*.ts', '*.tsx'],
   languageOptions: {
-    parser: '@typescript-eslint/parser',
+    parser: tsParser,
   },
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react-hooks/recommended'
-  ],
+  // instead of 'extends' use plugin-provided configs where possible
+  rules: {
+    ...tsEslintPlugin.configs.recommended.rules,
+    ...reactHooksPlugin.configs.recommended.rules,
+  },
 }
 ]
