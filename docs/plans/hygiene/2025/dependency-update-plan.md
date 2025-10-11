@@ -93,13 +93,15 @@ If later we adopt multiple top-level packages, we can convert the repo to an npm
 - Completed: Refactored `ui_src` npm scripts to use local binaries; added `start` and `check:types` convenience scripts.
 - Completed: TypeScript/ESLint alignment and local lint config for ESLint v9. Typecheck, lint, and build verified.
 - Completed: PostCSS and Autoprefixer bumped and verified the Tailwind build.
+- Completed: Replaced legacy download utilities with a native helper and removed `file-saver`/`js-file-download` from `ui_src` (commit `2549b5f`).
 
 ## Remaining frontend tasks (implementation plan)
 Each bullet lists the action and the exact commit message that will be used when the step is completed.
 
-1. Replace legacy download utilities
-	- Action: Remove `js-file-download` and `file-saver` usage. Add a small native download helper `ui_src/src/utils/download.ts` and update callers in the UI. Remove packages from `ui_src/package.json` and update lockfile.
-	- Commit message: "refactor: replace js-file-download/file-saver with native download helper"
+1. Replace legacy download utilities (COMPLETED)
+ 	- Action: Remove `js-file-download` and `file-saver` usage. Added `ui_src/src/utils/download.ts` and updated callers in the UI. Removed packages from `ui_src/package.json` and updated lockfile.
+ 	- Commit message: "refactor: replace js-file-download/file-saver with native download helper"
+ 	- Commit: `2549b5f`
 
 2. Audio pipeline — remove `audiobuffer-to-wav`
 	- Action: Replace `audiobuffer-to-wav` with a small in-repo `toWav` helper (or a maintained alternative) that converts an AudioBuffer to a WAV blob. Update imports and remove the package.
