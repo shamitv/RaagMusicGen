@@ -16,3 +16,8 @@ https://raag.shamit-cloud.com/ui/
 3. Start server [run_server.sh](run_server.sh)
 4. Open UI in browser http://localhost:9060/ui
 
+**Documentation**
+
+- [Music generation overview](docs/music-generation/overview.md)
+- [Melodic logic details](docs/music-generation/TuneGenerationLogic.md)
+
