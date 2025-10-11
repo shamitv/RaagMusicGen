@@ -207,9 +207,9 @@ function App() {
             return
         }
 
-    // Ensure the audio element reloads the updated object URL before playing
-    audioElement.src = audioUrl
-    audioElement.load()
+        // Ensure the audio element reloads the updated object URL before playing
+        audioElement.src = audioUrl
+        audioElement.load()
         audioElement.currentTime = 0
         const playPromise = audioElement.play()
         if (playPromise && typeof playPromise.catch === 'function') {
