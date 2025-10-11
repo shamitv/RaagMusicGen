@@ -129,7 +129,7 @@ async function generateTune(raag: number, instrument: number): Promise<Generated
     // - In production, default to same-origin (empty string)
     const rawApiBase = env?.VITE_API_BASE ?? ''
     const mode = env?.MODE ?? (process.env.NODE_ENV ?? 'production')
-    const API_BASE = rawApiBase || (mode === 'development' ? 'http://localhost:8000' : '')
+    const API_BASE = rawApiBase || (mode === 'development' ? 'http://localhost:9060' : '')
     // ensure no duplicate slashes when joining
     const base = API_BASE.replace(/\/+$/, '')
     const api_url = `${base}/GenerateTune/Raag/${raag}/Instrument/${instrument}`;

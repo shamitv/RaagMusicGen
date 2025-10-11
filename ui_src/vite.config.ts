@@ -10,7 +10,7 @@ export default defineConfig({
     proxy: {
       // proxy any request starting with /GenerateTune to http://localhost:8000
       '/GenerateTune': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:9060',
         changeOrigin: true,
         secure: false,
       },
