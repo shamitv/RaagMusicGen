@@ -1,8 +1,7 @@
 import './App.css'
 import WebMscore from 'webmscore'
 
-import {useState} from "react";
-import {useRef}  from 'react';
+import { useEffect, useRef, useState } from 'react'
 import ReactGA from "react-ga4";
 import { audioBufferToWav } from './utils/audio'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -195,6 +194,33 @@ function App() {
 
     const audioPlayerRef = useRef<HTMLAudioElement | null>(null)
 
+    useEffect(() => {
+        const audioElement = audioPlayerRef.current
+        if (!audioElement) {
+            return
+        }
+
+        if (!audioUrl) {
+            audioElement.pause()
+            audioElement.removeAttribute('src')
+            audioElement.load()
+            return
+        }
+
+    // Ensure the audio element reloads the updated object URL before playing
+    audioElement.src = audioUrl
+    audioElement.load()
+        audioElement.currentTime = 0
+        const playPromise = audioElement.play()
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch((err) => {
+                if (err && err.name !== 'AbortError') {
+                    console.warn('Audio playback was blocked by the browser', err)
+                }
+            })
+        }
+    }, [audioUrl])
+
     if(!soundDataState){
         loadSoundData().then((value) => {setSoundDataState(value)})
     }
@@ -259,12 +285,6 @@ function App() {
                                         setAudioUrl(values.audioUrl)
                                         setMidiUrl(values.midiUrl)
                                         setMusicXmlUrl(values.musicXmlUrl)
-                                        const audioRef = audioPlayerRef.current
-                                        if (audioRef) {
-                                            audioRef.load()
-                                            // ignore play promise
-                                            void audioRef.play()
-                                        }
                                     })
 
                                 }}>{soundDataState ? 'Generate Tune' : 'Initializing...'}</button>
@@ -310,9 +330,7 @@ function App() {
                     </button>
 
                 </div>
-                <audio controls className="w-full" ref={audioPlayerRef}>
-                    <source src={audioUrl}/>
-                </audio>
+                <audio controls className="w-full" ref={audioPlayerRef} src={audioUrl} />
                 <div className="mb-8">
                     <img src={imageUrl} alt="Music Sheet" className="w-full aspect-w-1 aspect-h-1"/>
                 </div>
