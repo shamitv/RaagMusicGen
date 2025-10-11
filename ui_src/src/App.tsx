@@ -4,7 +4,7 @@ import WebMscore from 'webmscore'
 import {useState} from "react";
 import {useRef}  from 'react';
 import ReactGA from "react-ga4";
-import toWav from 'audiobuffer-to-wav'
+import { audioBufferToWav } from './utils/audio'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { downloadFromUrl } from './utils/download';
@@ -94,7 +94,7 @@ async function getAudioURL(score: WebMscore) {
             break
         }
     }
-    const blob = new Blob([toWav(audioBuf)], {type: "audio/wav"});
+    const blob = new Blob([audioBufferToWav(audioBuf)], {type: "audio/wav"});
     const url = window.URL.createObjectURL(blob);
     return url;
 }
