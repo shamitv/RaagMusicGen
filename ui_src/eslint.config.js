@@ -22,7 +22,7 @@ export default [
     '@typescript-eslint': tsEslintPlugin,
     'react-hooks': reactHooksPlugin,
   },
-  ignores: ['dist', 'node_modules'],
+  ignores: ['dist', 'node_modules', 'dist/**', '**/dist/**', 'vite.config.ts', 'vite.config.js', 'postcss.config.js', 'tailwind.config.js', '*.config.js', '*.config.ts'],
   settings: {
     react: {
       version: 'detect',
@@ -37,7 +37,7 @@ export default [
   },
 },
 {
-  files: ['*.ts', '*.tsx'],
+  files: ['src/**/*.ts', 'src/**/*.tsx'],
   languageOptions: {
     parser: tsParser,
     parserOptions: {
