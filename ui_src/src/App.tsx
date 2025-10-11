@@ -122,7 +122,9 @@ async function generateTune(raag: number, instrument: number): Promise<Generated
     ReactGA.event({category:"AppInit",action:msg})
     console.log(msg)
     // Read API base from Vite env (statically inlined at build time). Fall back to same-origin.
-    const API_BASE = (import.meta as any).env?.VITE_API_BASE ?? ''
+    // Type import.meta.env safely to avoid `any` and satisfy lint rules
+    const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env
+    const API_BASE = env?.VITE_API_BASE ?? ''
     // ensure no duplicate slashes when joining
     const base = API_BASE.replace(/\/+$/, '')
     const api_url = `${base}/GenerateTune/Raag/${raag}/Instrument/${instrument}`;
