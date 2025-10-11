@@ -1,12 +1,13 @@
 import fs from 'fs'
 import path from 'path'
+import tsParser from '@typescript-eslint/parser'
 
 const tsconfigPath = path.resolve(process.cwd(), 'tsconfig.json')
 
 export default [
   {
   languageOptions: {
-    parser: '@typescript-eslint/parser',
+    parser: tsParser,
     parserOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
