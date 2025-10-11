@@ -7,6 +7,7 @@ import ReactGA from "react-ga4";
 import toWav from 'audiobuffer-to-wav'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
+import { downloadFromUrl } from './utils/download';
 
 ReactGA.initialize("G-GSS7C0CEKM");
 
@@ -82,7 +83,11 @@ async function getAudioURL(score: WebMscore) {
         // Float32Array[ channelA 512 frames, channelB 512 frames ]
         for (let c = 0; c < CHANNELS; c++) {
             const buf = frames.subarray(c * FRAME_LENGTH, (c + 1) * FRAME_LENGTH)
-            audioBuf.copyToChannel(buf as unknown as Float32Array, c, i)
+            // copy into a concrete Float32Array backed by an ArrayBuffer to satisfy
+            // the Web Audio API typing and ensure compatibility with SharedArrayBuffer
+            const tmp = new Float32Array(buf.length)
+            tmp.set(buf)
+            audioBuf.copyToChannel(tmp, c, i)
         }
 
         if (res.done) {
@@ -247,7 +252,16 @@ function App() {
                     <button disabled={false} className={`button ${false ? "button-disabled" : "button-enabled"}`}
                             onClick={() => {
                                 console.log("Will Download Midi")
-                                midiDownloadLinkRef.current?.click()
+                                // prefer direct anchor click when a URL is available (same as before)
+                                if (midiDownloadLinkRef.current && midiUrl) {
+                                    midiDownloadLinkRef.current.click()
+                                    return
+                                }
+                                // fallback: if we had a blob-based MIDI, create a blob and download
+                                // (most callers set midiUrl to an object URL already)
+                                if (midiUrl) {
+                                    downloadFromUrl(midiUrl, 'tune.mid')
+                                }
                             }}>
                         <span style={{marginLeft: '0.5rem'}}>MIDI File</span>
                         <FontAwesomeIcon icon={faDownload}
@@ -261,7 +275,13 @@ function App() {
                     <button disabled={false} className={`button ${false ? "button-disabled" : "button-enabled"}`}
                             onClick={() => {
                                 console.log("Will Download Music XML")
-                                xmlDownloadLinkRef.current?.click()
+                                if (xmlDownloadLinkRef.current && musicXmlUrl) {
+                                    xmlDownloadLinkRef.current.click()
+                                    return
+                                }
+                                if (musicXmlUrl) {
+                                    downloadFromUrl(musicXmlUrl, 'tune.musicxml')
+                                }
 
                             }}>{"Music File  "}
                         <FontAwesomeIcon icon={faDownload}
