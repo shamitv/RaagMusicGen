@@ -121,8 +121,12 @@ async function generateTune(raag: number, instrument: number): Promise<Generated
     var msg = '"Fetching Tune from API"'
     ReactGA.event({category:"AppInit",action:msg})
     console.log(msg)
-    const api_url = `/GenerateTune/Raag/${raag}/Instrument/${instrument}`;
-    const resp = await fetch(api_url,{method: 'GET'})
+    // Read API base from Vite env (statically inlined at build time). Fall back to same-origin.
+    const API_BASE = (import.meta as any).env?.VITE_API_BASE ?? ''
+    // ensure no duplicate slashes when joining
+    const base = API_BASE.replace(/\/+$/, '')
+    const api_url = `${base}/GenerateTune/Raag/${raag}/Instrument/${instrument}`;
+    const resp = await fetch(api_url, { method: 'GET' })
     const data = await resp.json()
     var xml = data.xml;
     console.log("Got XML");
