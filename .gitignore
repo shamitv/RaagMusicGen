@@ -1,5 +1,6 @@
-/data/generated_songs/
-/venv/
+__pycache__/
+data/generated_songs/
+venv/
 node_modules
 .idea
 .DS_Store
