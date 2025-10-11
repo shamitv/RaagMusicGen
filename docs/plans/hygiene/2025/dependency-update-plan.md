@@ -96,6 +96,10 @@ If later we adopt multiple top-level packages, we can convert the repo to an npm
 - Completed: Replaced legacy download utilities with a native helper and removed `file-saver`/`js-file-download` from `ui_src` (commit `2549b5f`).
  - Completed: Replaced legacy download utilities with a native helper and removed `file-saver`/`js-file-download` from `ui_src` (commit `2549b5f`).
  - Completed: Replaced `audiobuffer-to-wav` with an in-repo `audioBufferToWav` helper (commit `0c32845`).
+ - Completed: Upgraded `postcss` and `autoprefixer` in `ui_src` to `postcss@^8.4.49` and `autoprefixer@^10.4.21` and verified build and lint (commit `e7f1e3f`).
+ - Audit summary: Ran `npm audit` in `ui_src`. Found several low/moderate issues largely in dev-dependencies (eslint, vite, vitest, esbuild). Most have fixes available in newer major versions (e.g., Vitest 3.x, Vite >6.3.5). Recommendations:
+	 - Upgrade `vite` and `vitest` together (breaking change) as a separate task/prioritized work (we did not upgrade them automatically here to avoid large semver bumps during this hygiene window).
+	 - Prioritize server-side or CI mitigations for dev-only tooling vulnerabilities; they don't affect production bundles but should be tracked and updated on a cadence.
 
 ## Remaining frontend tasks (implementation plan)
 Each bullet lists the action and the exact commit message that will be used when the step is completed.
