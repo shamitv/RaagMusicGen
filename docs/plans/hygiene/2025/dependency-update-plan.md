@@ -87,3 +87,32 @@ Files removed:
 Commit used: "chore(deps): consolidate root package.json"
 
 If later we adopt multiple top-level packages, we can convert the repo to an npm/pnpm workspace and add back a root manifest with a `workspaces` array.
+
+## Progress updates (live)
+- Completed: Audit root manifest, consolidated frontend deps into `ui_src` and removed root `package.json` and `package-lock.json`.
+- Completed: Refactored `ui_src` npm scripts to use local binaries; added `start` and `check:types` convenience scripts.
+- Completed: TypeScript/ESLint alignment and local lint config for ESLint v9. Typecheck, lint, and build verified.
+- Completed: PostCSS and Autoprefixer bumped and verified the Tailwind build.
+
+## Remaining frontend tasks (implementation plan)
+Each bullet lists the action and the exact commit message that will be used when the step is completed.
+
+1. Replace legacy download utilities
+	- Action: Remove `js-file-download` and `file-saver` usage. Add a small native download helper `ui_src/src/utils/download.ts` and update callers in the UI. Remove packages from `ui_src/package.json` and update lockfile.
+	- Commit message: "refactor: replace js-file-download/file-saver with native download helper"
+
+2. Audio pipeline — remove `audiobuffer-to-wav`
+	- Action: Replace `audiobuffer-to-wav` with a small in-repo `toWav` helper (or a maintained alternative) that converts an AudioBuffer to a WAV blob. Update imports and remove the package.
+	- Commit message: "chore(audio): replace audiobuffer-to-wav with in-repo toWav helper"
+
+3. Validate analytics integration
+	- Action: Move GA measurement ID into environment (Vite) using `import.meta.env.VITE_GA_MEASUREMENT_ID`, initialize `react-ga4` only if present, and make sure measurement id is not hard-coded.
+	- Commit message: "chore(analytics): read GA measurement ID from env and guard initialization"
+
+4. Enable automated dependency monitoring
+	- Action: Add `.github/dependabot.yml` configured for the `ui_src` npm folder and add `npm audit` to CI (or CI job stub). Commit message: "ci(deps): enable dependabot and npm audit in CI"
+
+Execution guidelines
+- I will implement the remaining steps in order. After each change I will run `npm --prefix ui_src run check:types`, `npm --prefix ui_src run lint`, and `npm --prefix ui_src run build` (if present) to verify the change. I will commit after each step using the message above.
+
+If you'd like a different order, tell me which step to start with. Otherwise I'll proceed with step 1 (replace legacy download utils) now.
