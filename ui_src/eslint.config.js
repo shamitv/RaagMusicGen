@@ -1,6 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 import tsParser from '@typescript-eslint/parser'
+import tsEslintPlugin from '@typescript-eslint/eslint-plugin'
+import reactHooksPlugin from 'eslint-plugin-react-hooks'
 
 const tsconfigPath = path.resolve(process.cwd(), 'tsconfig.json')
 
@@ -16,8 +18,8 @@ export default [
     },
   },
   plugins: {
-    '@typescript-eslint': {},
-    'react-hooks': {},
+    '@typescript-eslint': tsEslintPlugin,
+    'react-hooks': reactHooksPlugin,
   },
   ignores: ['dist', 'node_modules'],
   settings: {
