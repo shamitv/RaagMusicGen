@@ -124,7 +124,12 @@ async function generateTune(raag: number, instrument: number): Promise<Generated
     // Read API base from Vite env (statically inlined at build time). Fall back to same-origin.
     // Type import.meta.env safely to avoid `any` and satisfy lint rules
     const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env
-    const API_BASE = env?.VITE_API_BASE ?? ''
+    // Default behavior:
+    // - In development, default to http://localhost:8000 when VITE_API_BASE is not set
+    // - In production, default to same-origin (empty string)
+    const rawApiBase = env?.VITE_API_BASE ?? ''
+    const mode = env?.MODE ?? (process.env.NODE_ENV ?? 'production')
+    const API_BASE = rawApiBase || (mode === 'development' ? 'http://localhost:8000' : '')
     // ensure no duplicate slashes when joining
     const base = API_BASE.replace(/\/+$/, '')
     const api_url = `${base}/GenerateTune/Raag/${raag}/Instrument/${instrument}`;
